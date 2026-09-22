@@ -56,7 +56,6 @@
   </script>
 
   <style>
-    /* 適應 iPhone 頂部安全區 (瀏海 / 動態島) 與 底部 Home Bar */
     body {
       padding-top: max(env(safe-area-inset-top), 16px);
       padding-bottom: calc(max(env(safe-area-inset-bottom), 16px) + 82px);
@@ -103,39 +102,53 @@
   <!-- 主要內容區 -->
   <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
 
-    <!-- 頁籤一：重訓紀錄 (Workout Tracker) -->
+    <!-- 頁籤一：運動紀錄 (Workout Tracker: 重訓 / 有氧) -->
     <section id="tab-workout" class="tab-content active space-y-4">
-      <!-- 今日重訓精華卡片 -->
+      <!-- 今日運動成效看板 -->
       <div class="bg-gradient-to-br from-white via-rose-50/40 to-rose-100/50 p-4 rounded-3xl border border-rose-100 shadow-sm">
         <div class="flex items-center justify-between mb-3">
           <div class="flex items-center gap-1.5 text-xs font-bold text-stone-600">
-            <i data-lucide="activity" class="w-4 h-4 text-rose-400"></i> 今日運動成效
+            <i data-lucide="activity" class="w-4 h-4 text-rose-400"></i> 今日運動成果
           </div>
-          <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-200/50 text-rose-600 font-semibold" id="todayWorkoutTag">
-            0 個動作
+          <span class="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-200/50 text-rose-600 font-semibold" id="todayWorkoutTag">
+            0 重訓 · 0 有氧
           </span>
         </div>
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
-            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">總組數</span>
-            <p class="text-lg font-black text-rose-500 mt-0.5" id="statTodaySets">0</p>
+        <div class="grid grid-cols-4 gap-1.5 text-center">
+          <div class="bg-white/90 py-2 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[9px] font-medium text-stone-400 uppercase tracking-wide">總組數</span>
+            <p class="text-base font-black text-rose-500 mt-0.5" id="statTodaySets">0</p>
           </div>
-          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
-            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">總容量</span>
-            <p class="text-lg font-black text-stone-800 mt-0.5"><span id="statTodayVolume">0</span><span class="text-[11px] font-medium text-stone-400 ml-0.5">kg</span></p>
+          <div class="bg-white/90 py-2 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[9px] font-medium text-stone-400 uppercase tracking-wide">總容量</span>
+            <p class="text-base font-black text-stone-800 mt-0.5"><span id="statTodayVolume">0</span><span class="text-[9px] font-medium text-stone-400 ml-0.5">kg</span></p>
           </div>
-          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
-            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">最高 1RM</span>
-            <p class="text-lg font-black text-rose-400 mt-0.5"><span id="statTodayMax1RM">0</span><span class="text-[11px] font-medium text-stone-400 ml-0.5">kg</span></p>
+          <div class="bg-white/90 py-2 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[9px] font-medium text-stone-400 uppercase tracking-wide">有氧時長</span>
+            <p class="text-base font-black text-amber-500 mt-0.5"><span id="statTodayCardioMins">0</span><span class="text-[9px] font-medium text-stone-400 ml-0.5">分</span></p>
+          </div>
+          <div class="bg-white/90 py-2 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[9px] font-medium text-stone-400 uppercase tracking-wide">有氧距離</span>
+            <p class="text-base font-black text-rose-400 mt-0.5"><span id="statTodayCardioDist">0</span><span class="text-[9px] font-medium text-stone-400 ml-0.5">km</span></p>
           </div>
         </div>
       </div>
 
-      <!-- 新增訓練輸入表單 -->
-      <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
+      <!-- 模式切換：重訓 vs 有氧 -->
+      <div class="bg-rose-100/60 p-1 rounded-2xl flex items-center text-xs font-bold text-stone-500">
+        <button type="button" onclick="switchWorkoutEntryType('strength')" id="modeBtn-strength" class="flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition flex items-center justify-center gap-1.5">
+          <i data-lucide="dumbbell" class="w-3.5 h-3.5"></i> 重訓塑形
+        </button>
+        <button type="button" onclick="switchWorkoutEntryType('cardio')" id="modeBtn-cardio" class="flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition flex items-center justify-center gap-1.5">
+          <i data-lucide="flame" class="w-3.5 h-3.5"></i> 輕盈有氧
+        </button>
+      </div>
+
+      <!-- 表單 A：重訓輸入 -->
+      <div id="formStrength" class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
         <div class="flex items-center justify-between">
           <h2 class="text-sm font-bold text-stone-800 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-rose-400"></span> 記錄一組訓練
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span> 記錄一組重訓
           </h2>
           <span class="text-[11px] text-rose-400 font-semibold" id="estimated1rmDisplay">預估 1RM: -- kg</span>
         </div>
@@ -155,7 +168,7 @@
         <div>
           <label class="block text-[11px] font-semibold text-stone-400 mb-1 uppercase">動作名稱</label>
           <div class="relative">
-            <input list="presetExercises" id="inputExercise" type="text" placeholder="例：槓鈴臀推、羅馬尼亞硬舉、高腳杯深蹲"
+            <input list="presetExercises" id="inputExercise" type="text" placeholder="例：槓鈴臀推、羅馬尼亞硬舉"
               class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition">
             <datalist id="presetExercises">
               <option value="槓鈴臀推 (Hip Thrust)"></option>
@@ -197,19 +210,88 @@
           </div>
         </div>
 
-        <!-- 儲存按鈕 -->
-        <button onclick="saveWorkoutSet()" class="w-full py-3.5 bg-gradient-to-r from-rose-400 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white font-bold rounded-2xl shadow-md shadow-rose-200 active:scale-[0.98] transition flex items-center justify-center gap-2">
-          <i data-lucide="plus" class="w-4 h-4"></i> 新增此組紀錄
+        <button onclick="saveWorkoutSet()" class="w-full py-3.5 bg-gradient-to-r from-rose-400 to-rose-500 hover:from-rose-500 text-white font-bold rounded-2xl shadow-md shadow-rose-200 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> 新增重訓組數
         </button>
       </div>
 
-      <!-- 今日動作分組紀錄列表 -->
+      <!-- 表單 B：有氧輸入 (Cardio Form) -->
+      <div id="formCardio" class="hidden bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-stone-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span> 記錄有氧運動
+          </h2>
+          <span class="text-[11px] text-amber-500 font-semibold" id="cardioSummaryDisplay">推算距離: 0.0 km</span>
+        </div>
+
+        <!-- 有氧項目快捷選擇 -->
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-400 mb-1.5 uppercase">運動項目</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" onclick="selectCardioType('跑步機', this)" class="cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition">跑步機</button>
+            <button type="button" onclick="selectCardioType('飛輪單車', this)" class="cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">飛輪單車</button>
+            <button type="button" onclick="selectCardioType('爬樓梯機', this)" class="cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">爬樓梯機</button>
+            <button type="button" onclick="selectCardioType('橢圓機', this)" class="cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">橢圓機</button>
+          </div>
+          <input id="inputCardioCustomName" type="text" placeholder="或輸入其他：戶外慢跑、划船機..."
+            class="mt-2 w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-700 placeholder-stone-400 focus:outline-none focus:border-rose-400">
+        </div>
+
+        <!-- 速度與時間 -->
+        <div class="grid grid-cols-2 gap-3">
+          <!-- 速度 (Speed) -->
+          <div class="bg-amber-50/40 p-3 rounded-2xl border border-amber-100/60 text-center">
+            <span class="text-[11px] font-semibold text-stone-500 block mb-1">速度 (km/h) <span class="text-rose-400">*</span></span>
+            <input id="inputCardioSpeed" type="number" step="0.1" min="0" placeholder="8.0"
+              class="w-full bg-white border border-amber-200 rounded-xl py-2 text-center text-lg font-black text-amber-600 focus:outline-none focus:border-amber-400"
+              oninput="onCardioInputChanged()">
+            <div class="flex justify-center gap-1.5 mt-2">
+              <button type="button" onclick="adjustCardioSpeed(-0.5)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">-0.5</button>
+              <button type="button" onclick="adjustCardioSpeed(0.5)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">+0.5</button>
+              <button type="button" onclick="adjustCardioSpeed(1.0)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">+1.0</button>
+            </div>
+          </div>
+
+          <!-- 時間 (Duration) -->
+          <div class="bg-amber-50/40 p-3 rounded-2xl border border-amber-100/60 text-center">
+            <span class="text-[11px] font-semibold text-stone-500 block mb-1">時間 (分鐘) <span class="text-rose-400">*</span></span>
+            <input id="inputCardioDuration" type="number" step="1" min="1" placeholder="30"
+              class="w-full bg-white border border-amber-200 rounded-xl py-2 text-center text-lg font-black text-stone-800 focus:outline-none focus:border-amber-400"
+              oninput="onCardioInputChanged()">
+            <div class="flex justify-center gap-1.5 mt-2">
+              <button type="button" onclick="adjustCardioDuration(-5)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">-5</button>
+              <button type="button" onclick="adjustCardioDuration(5)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">+5</button>
+              <button type="button" onclick="adjustCardioDuration(10)" class="text-[11px] px-2 py-0.5 bg-white border border-amber-200 rounded-lg text-stone-600 active:scale-95">+10</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 坡度 / 估算消耗 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-400 mb-1">坡度/阻力 (選填)</label>
+            <input id="inputCardioIncline" type="number" step="0.5" placeholder="例：3 %"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-400 mb-1">估算消耗卡路里 (kcal)</label>
+            <input id="inputCardioCalories" type="number" step="1" placeholder="自動推算"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+          </div>
+        </div>
+
+        <button onclick="saveCardioRecord()" class="w-full py-3.5 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-500 hover:to-rose-500 text-white font-bold rounded-2xl shadow-md shadow-amber-100 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <i data-lucide="flame" class="w-4 h-4"></i> 儲存有氧紀錄
+        </button>
+      </div>
+
+      <!-- 今日運動清單 (包含重訓與有氧) -->
       <div class="space-y-3">
         <div class="flex items-center justify-between px-1">
           <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
-            <i data-lucide="calendar-heart" class="w-4 h-4 text-rose-400"></i> 今日清單
+            <i data-lucide="calendar-heart" class="w-4 h-4 text-rose-400"></i> 今日運動日誌
           </h3>
-          <span class="text-xs text-stone-400" id="todaySetsCountText">0 組訓練</span>
+          <span class="text-xs text-stone-400" id="todayItemsCountText">0 筆紀錄</span>
         </div>
 
         <div id="todaySetsList" class="space-y-2.5"></div>
@@ -333,13 +415,14 @@
       </div>
     </section>
 
-    <!-- 頁籤三：數據圖表 (Analytics & Trends) -->
+    <!-- 頁籤三：數據圖表 (Analytics & Trends: 包含體態、容量、1RM 與 有氧) -->
     <section id="tab-analytics" class="tab-content space-y-4">
-      <!-- 圖表子分頁切換 -->
-      <div class="bg-rose-100/60 p-1 rounded-2xl flex items-center text-xs font-bold text-stone-500">
-        <button onclick="switchChartMode('body')" id="chartBtn-body" class="flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition">體態趨勢</button>
-        <button onclick="switchChartMode('volume')" id="chartBtn-volume" class="flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">總容量進度</button>
-        <button onclick="switchChartMode('exercise')" id="chartBtn-exercise" class="flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">單項 1RM</button>
+      <!-- 圖表子分頁切換 (新增有氧進度切換) -->
+      <div class="bg-rose-100/60 p-1 rounded-2xl grid grid-cols-4 gap-1 text-[11px] font-bold text-stone-500 text-center">
+        <button onclick="switchChartMode('body')" id="chartBtn-body" class="py-2 rounded-xl bg-white text-rose-600 shadow-xs transition">體態</button>
+        <button onclick="switchChartMode('volume')" id="chartBtn-volume" class="py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">總容量</button>
+        <button onclick="switchChartMode('exercise')" id="chartBtn-exercise" class="py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">1RM</button>
+        <button onclick="switchChartMode('cardio')" id="chartBtn-cardio" class="py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">有氧</button>
       </div>
 
       <!-- 子圖表 1: 體態趨勢 -->
@@ -350,7 +433,6 @@
           </h3>
           <span class="text-[10px] text-stone-400">雙軸對比</span>
         </div>
-        <!-- 快速指標勾選切換 -->
         <div class="flex gap-3 text-[11px] font-semibold text-stone-500 px-1">
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> 體重 (kg)</span>
           <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> 體脂 (%)</span>
@@ -361,11 +443,11 @@
         </div>
       </div>
 
-      <!-- 子圖表 2: 每次訓練總容量趨勢 -->
+      <!-- 子圖表 2: 每次重訓總容量趨勢 -->
       <div id="chartContainer-volume" class="hidden bg-white rounded-3xl p-4 border border-rose-100 shadow-sm space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-rose-400"></i> 每日訓練總容量 (Volume)
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-rose-400"></i> 每日重訓總容量 (Volume)
           </h3>
           <span class="text-[10px] text-stone-400">重量 × 次數</span>
         </div>
@@ -387,11 +469,27 @@
           <label class="block text-[11px] font-semibold text-stone-400 mb-1">選擇分析動作</label>
           <select id="exerciseChartSelect" onchange="updateExerciseProgressChart()"
             class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
-            <!-- 動態填入動作 -->
           </select>
         </div>
         <div class="relative h-64 w-full">
           <canvas id="exerciseTrendsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 子圖表 4: 新增有氧趨勢圖 (時間與距離) -->
+      <div id="chartContainer-cardio" class="hidden bg-white rounded-3xl p-4 border border-rose-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+            <i data-lucide="heart-pulse" class="w-4 h-4 text-amber-500"></i> 有氧運動時長與距離
+          </h3>
+          <span class="text-[10px] text-stone-400">耐力追蹤</span>
+        </div>
+        <div class="flex gap-3 text-[11px] font-semibold text-stone-500 px-1">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> 時長 (分鐘)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> 距離 (km)</span>
+        </div>
+        <div class="relative h-64 w-full">
+          <canvas id="cardioTrendsChart"></canvas>
         </div>
       </div>
     </section>
@@ -401,9 +499,9 @@
       <!-- 訓練歷史清單 -->
       <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-3">
         <h3 class="text-sm font-bold text-stone-800 flex items-center gap-2">
-          <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i> 重訓歷程回顧
+          <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i> 運動歷程回顧
         </h3>
-        <p class="text-xs text-stone-400">依照每次訓練日期分類檢視總容量與組數細節。</p>
+        <p class="text-xs text-stone-400">依日期整合展示每日的重訓組數與有氧運動內容。</p>
         <div id="allWorkoutsHistoryList" class="space-y-3 pt-2"></div>
       </div>
 
@@ -413,7 +511,7 @@
           <i data-lucide="cloud-check" class="w-4 h-4 text-rose-400"></i> 匯出與還原（換手機必備）
         </h3>
         <p class="text-xs text-stone-400 leading-relaxed">
-          所有數據都安靜儲存在這隻 iPhone 本機上。更換手機或定期維護時，點擊下方即可將<strong>重訓與 InBody 數據</strong>一次打包匯出成單一備份檔案。
+          所有數據都安靜儲存在這隻 iPhone 本機上。更換手機或定期備份時，點擊下方即可將<strong>重訓、有氧與 InBody 數據</strong>一次打包匯出成單一備份檔案。
         </p>
 
         <div class="grid grid-cols-2 gap-2.5 pt-1">
@@ -455,25 +553,32 @@
   </div>
 
   <script>
-    const STORAGE_KEY_WORKOUTS = 'bloomfit_workouts_v2';
-    const STORAGE_KEY_INBODY = 'bloomfit_inbody_v2';
+    const STORAGE_KEY_WORKOUTS = 'bloomfit_workouts_v3';
+    const STORAGE_KEY_CARDIO = 'bloomfit_cardio_v3';
+    const STORAGE_KEY_INBODY = 'bloomfit_inbody_v3';
 
-    let workoutLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_WORKOUTS) || '[]');
-    let inbodyLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_INBODY) || '[]');
+    // 相容先前 v2 版本的資料匯入
+    let workoutLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_WORKOUTS) || localStorage.getItem('bloomfit_workouts_v2') || '[]');
+    let cardioLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_CARDIO) || '[]');
+    let inbodyLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_INBODY) || localStorage.getItem('bloomfit_inbody_v2') || '[]');
+    
+    let currentWorkoutType = 'strength'; // 'strength' | 'cardio'
     let currentMuscleGroup = '臀腿';
+    let currentCardioType = '跑步機';
     let currentChartMode = 'body';
 
-    // Chart.js 實例暫存
+    // Chart.js 實例存儲
     let bodyChartInstance = null;
     let volumeChartInstance = null;
     let exerciseChartInstance = null;
+    let cardioChartInstance = null;
 
     const MOTIVATIONS = [
       '今天的妳比昨天更有力量 ✨',
-      '每一組努力都不會白費 💕',
-      '專注線條，享受汗水 🌸',
+      '重訓雕塑線條，有氧輕盈身心 💕',
+      '每一滴汗水都在雕塑更好的妳 🌸',
       '遇見更好的自己 🌷',
-      '肌肉是最好的緊緻緊身衣 💫'
+      '享受每一次運動後的通透與放鬆 💫'
     ];
 
     function getTodayString() {
@@ -502,6 +607,7 @@
       }, 2200);
     }
 
+    // 頁籤切換
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => {
@@ -519,6 +625,28 @@
       if (tabId === 'history') renderAllHistory();
     }
 
+    // 切換 重訓 vs 有氧 填寫模式
+    function switchWorkoutEntryType(type) {
+      currentWorkoutType = type;
+      const sBtn = document.getElementById('modeBtn-strength');
+      const cBtn = document.getElementById('modeBtn-cardio');
+      const sForm = document.getElementById('formStrength');
+      const cForm = document.getElementById('formCardio');
+
+      if (type === 'strength') {
+        sBtn.className = 'flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition flex items-center justify-center gap-1.5';
+        cBtn.className = 'flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition flex items-center justify-center gap-1.5';
+        sForm.classList.remove('hidden');
+        cForm.classList.add('hidden');
+      } else {
+        cBtn.className = 'flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition flex items-center justify-center gap-1.5';
+        sBtn.className = 'flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition flex items-center justify-center gap-1.5';
+        cForm.classList.remove('hidden');
+        sForm.classList.add('hidden');
+      }
+    }
+
+    // 重訓部位切換
     function selectMuscleGroup(group, btn) {
       currentMuscleGroup = group;
       document.querySelectorAll('.muscle-group-btn').forEach(b => {
@@ -561,6 +689,7 @@
       }
     }
 
+    // 重訓 1RM 計算
     function calculate1RM(weight, reps) {
       if (reps <= 0) return 0;
       if (reps === 1) return weight;
@@ -593,6 +722,7 @@
       onSetInputChanged();
     }
 
+    // 儲存重訓一組
     function saveWorkoutSet() {
       const exercise = document.getElementById('inputExercise').value.trim();
       const weight = parseFloat(document.getElementById('inputWeight').value);
@@ -626,36 +756,130 @@
       renderTodayWorkout();
     }
 
+    // 有氧項目切換
+    function selectCardioType(name, btn) {
+      currentCardioType = name;
+      document.querySelectorAll('.cardio-type-btn').forEach(b => {
+        b.className = 'cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition';
+      });
+      btn.className = 'cardio-type-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition';
+      document.getElementById('inputCardioCustomName').value = '';
+    }
+
+    function onCardioInputChanged() {
+      const speed = parseFloat(document.getElementById('inputCardioSpeed').value) || 0;
+      const duration = parseFloat(document.getElementById('inputCardioDuration').value) || 0;
+      const distance = Math.round((speed * (duration / 60)) * 100) / 100;
+      
+      document.getElementById('cardioSummaryDisplay').textContent = `推算距離: ${distance} km`;
+
+      // 簡易 MET 估算熱量（若無手動填寫）
+      const calInput = document.getElementById('inputCardioCalories');
+      if (!calInput.value || calInput.dataset.auto === 'true') {
+        const estimatedCal = Math.round(speed * 0.9 * duration * 1.1);
+        if (estimatedCal > 0) {
+          calInput.placeholder = `約 ${estimatedCal} kcal`;
+        }
+      }
+    }
+
+    function adjustCardioSpeed(delta) {
+      const input = document.getElementById('inputCardioSpeed');
+      const val = parseFloat(input.value) || 0;
+      input.value = Math.max(0, Math.round((val + delta) * 10) / 10);
+      onCardioInputChanged();
+    }
+
+    function adjustCardioDuration(delta) {
+      const input = document.getElementById('inputCardioDuration');
+      const val = parseInt(input.value) || 0;
+      input.value = Math.max(1, val + delta);
+      onCardioInputChanged();
+    }
+
+    // 儲存有氧紀錄
+    function saveCardioRecord() {
+      const customName = document.getElementById('inputCardioCustomName').value.trim();
+      const activityName = customName || currentCardioType;
+      const speed = parseFloat(document.getElementById('inputCardioSpeed').value);
+      const duration = parseInt(document.getElementById('inputCardioDuration').value);
+      const incline = parseFloat(document.getElementById('inputCardioIncline').value) || 0;
+      let calories = parseInt(document.getElementById('inputCardioCalories').value);
+
+      if (isNaN(speed) || isNaN(duration) || duration <= 0) {
+        showToast('請務必填寫速度與時間！✨');
+        return;
+      }
+
+      const distance = Math.round((speed * (duration / 60)) * 100) / 100;
+      if (!calories) {
+        calories = Math.round(speed * 0.9 * duration * 1.1);
+      }
+
+      const newCardio = {
+        id: 'cd_' + Date.now(),
+        date: getTodayString(),
+        timestamp: Date.now(),
+        activity: activityName,
+        speed: speed,
+        duration: duration,
+        distance: distance,
+        incline: incline,
+        calories: calories
+      };
+
+      cardioLogs.unshift(newCardio);
+      localStorage.setItem(STORAGE_KEY_CARDIO, JSON.stringify(cardioLogs));
+
+      showToast(`有氧紀錄完成：${activityName} ${duration}分鐘 (${distance}km) 🔥`);
+      renderTodayWorkout();
+    }
+
     function deleteWorkoutSet(id) {
       workoutLogs = workoutLogs.filter(item => item.id !== id);
       localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutLogs));
-      showToast('已刪除此組紀錄');
+      showToast('已刪除此組重訓紀錄');
       renderTodayWorkout();
       renderAllHistory();
     }
 
+    function deleteCardioRecord(id) {
+      cardioLogs = cardioLogs.filter(item => item.id !== id);
+      localStorage.setItem(STORAGE_KEY_CARDIO, JSON.stringify(cardioLogs));
+      showToast('已刪除此筆有氧紀錄');
+      renderTodayWorkout();
+      renderAllHistory();
+    }
+
+    // 渲染今日運動概況（重訓 + 有氧）
     function renderTodayWorkout() {
       const todayStr = getTodayString();
-      const todayList = workoutLogs.filter(item => item.date === todayStr);
+      const todayStrength = workoutLogs.filter(item => item.date === todayStr);
+      const todayCardio = cardioLogs.filter(item => item.date === todayStr);
       const container = document.getElementById('todaySetsList');
 
       let totalVol = 0;
-      let max1RM = 0;
       const uniqueExercises = new Set();
-
-      todayList.forEach(item => {
+      todayStrength.forEach(item => {
         totalVol += item.volume;
-        if (item.oneRM > max1RM) max1RM = item.oneRM;
         uniqueExercises.add(item.exercise);
       });
 
-      document.getElementById('statTodaySets').textContent = todayList.length;
-      document.getElementById('statTodayVolume').textContent = totalVol.toLocaleString();
-      document.getElementById('statTodayMax1RM').textContent = max1RM ? max1RM : '0';
-      document.getElementById('todayWorkoutTag').textContent = `${uniqueExercises.size} 個動作`;
-      document.getElementById('todaySetsCountText').textContent = `共 ${todayList.length} 組訓練`;
+      let totalCardioMins = 0;
+      let totalCardioDist = 0;
+      todayCardio.forEach(c => {
+        totalCardioMins += c.duration;
+        totalCardioDist += c.distance;
+      });
 
-      if (todayList.length === 0) {
+      document.getElementById('statTodaySets').textContent = todayStrength.length;
+      document.getElementById('statTodayVolume').textContent = totalVol.toLocaleString();
+      document.getElementById('statTodayCardioMins').textContent = totalCardioMins;
+      document.getElementById('statTodayCardioDist').textContent = Math.round(totalCardioDist * 10) / 10;
+      document.getElementById('todayWorkoutTag').textContent = `${uniqueExercises.size} 個動作 · ${todayCardio.length} 次有氧`;
+      document.getElementById('todayItemsCountText').textContent = `共 ${todayStrength.length + todayCardio.length} 項紀錄`;
+
+      if (todayStrength.length === 0 && todayCardio.length === 0) {
         container.innerHTML = `
           <div class="text-center py-8 bg-white/70 rounded-3xl border border-dashed border-rose-200 text-stone-400 space-y-1">
             <i data-lucide="flower" class="w-7 h-7 mx-auto stroke-1 text-rose-300"></i>
@@ -666,40 +890,78 @@
         return;
       }
 
-      const grouped = {};
-      todayList.forEach(item => {
-        if (!grouped[item.exercise]) grouped[item.exercise] = [];
-        grouped[item.exercise].push(item);
-      });
+      let html = '';
 
-      container.innerHTML = Object.keys(grouped).map(exName => {
-        const sets = grouped[exName];
-        const exVol = sets.reduce((s, it) => s + it.volume, 0);
-        return `
-          <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-xs space-y-2">
-            <div class="flex items-center justify-between border-b border-rose-50 pb-1.5">
+      // 1. 有氧卡片
+      if (todayCardio.length > 0) {
+        html += `
+          <div class="bg-amber-50/50 rounded-2xl p-3.5 border border-amber-200/60 shadow-xs space-y-2">
+            <div class="flex items-center justify-between border-b border-amber-100 pb-1.5">
               <span class="font-bold text-xs text-stone-800 flex items-center gap-1.5">
-                <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 text-[10px] font-semibold">${sets[0].group}</span>
-                ${exName}
+                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-600 text-[10px] font-semibold">有氧燃脂</span>
+                今日有氧成果
               </span>
-              <span class="text-[11px] font-medium text-rose-400">總量: ${exVol.toLocaleString()} kg</span>
+              <span class="text-[11px] font-medium text-amber-600">累計: ${totalCardioMins} 分鐘</span>
             </div>
-            <div class="space-y-1">
-              ${sets.map((item, idx) => `
-                <div class="flex items-center justify-between text-xs py-1 px-2 rounded-xl bg-rose-50/30">
-                  <span class="text-stone-400 text-[11px]">第 ${sets.length - idx} 組</span>
-                  <span class="font-bold text-stone-700">${item.weight} kg × ${item.reps} 次</span>
-                  <span class="text-[11px] text-stone-400">1RM: ${item.oneRM}kg</span>
-                  <button onclick="deleteWorkoutSet('${item.id}')" class="text-stone-300 hover:text-rose-400 p-0.5">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                  </button>
+            <div class="space-y-1.5">
+              ${todayCardio.map(cd => `
+                <div class="flex items-center justify-between text-xs py-1.5 px-2.5 rounded-xl bg-white border border-amber-100/70">
+                  <div>
+                    <span class="font-bold text-stone-800 mr-1.5">${cd.activity}</span>
+                    <span class="text-[11px] text-stone-500 font-medium">${cd.duration} 分鐘 · 速度 ${cd.speed} km/h</span>
+                    ${cd.incline ? `<span class="text-[10px] text-amber-500 ml-1">(坡度 ${cd.incline}%)</span>` : ''}
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-extrabold text-amber-600 text-xs">${cd.distance} km</span>
+                    <button onclick="deleteCardioRecord('${cd.id}')" class="text-stone-300 hover:text-rose-400 p-0.5">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
                 </div>
               `).join('')}
             </div>
           </div>
         `;
-      }).join('');
+      }
 
+      // 2. 重訓卡片 (依動作分組)
+      if (todayStrength.length > 0) {
+        const grouped = {};
+        todayStrength.forEach(item => {
+          if (!grouped[item.exercise]) grouped[item.exercise] = [];
+          grouped[item.exercise].push(item);
+        });
+
+        html += Object.keys(grouped).map(exName => {
+          const sets = grouped[exName];
+          const exVol = sets.reduce((s, it) => s + it.volume, 0);
+          return `
+            <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-xs space-y-2">
+              <div class="flex items-center justify-between border-b border-rose-50 pb-1.5">
+                <span class="font-bold text-xs text-stone-800 flex items-center gap-1.5">
+                  <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 text-[10px] font-semibold">${sets[0].group}</span>
+                  ${exName}
+                </span>
+                <span class="text-[11px] font-medium text-rose-400">總量: ${exVol.toLocaleString()} kg</span>
+              </div>
+              <div class="space-y-1">
+                ${sets.map((item, idx) => `
+                  <div class="flex items-center justify-between text-xs py-1 px-2 rounded-xl bg-rose-50/30">
+                    <span class="text-stone-400 text-[11px]">第 ${sets.length - idx} 組</span>
+                    <span class="font-bold text-stone-700">${item.weight} kg × ${item.reps} 次</span>
+                    <span class="text-[11px] text-stone-400">1RM: ${item.oneRM}kg</span>
+                    <button onclick="deleteWorkoutSet('${item.id}')" class="text-stone-300 hover:text-rose-400 p-0.5">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = html;
       lucide.createIcons();
     }
 
@@ -825,14 +1087,14 @@
 
     function switchChartMode(mode) {
       currentChartMode = mode;
-      ['body', 'volume', 'exercise'].forEach(m => {
+      ['body', 'volume', 'exercise', 'cardio'].forEach(m => {
         const btn = document.getElementById(`chartBtn-${m}`);
         const container = document.getElementById(`chartContainer-${m}`);
         if (m === mode) {
-          btn.className = 'flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition';
+          btn.className = 'py-2 rounded-xl bg-white text-rose-600 shadow-xs transition';
           container.classList.remove('hidden');
         } else {
-          btn.className = 'flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition';
+          btn.className = 'py-2 rounded-xl text-stone-500 hover:text-rose-500 transition';
           container.classList.add('hidden');
         }
       });
@@ -847,17 +1109,19 @@
       } else if (currentChartMode === 'exercise') {
         renderExerciseDropdown();
         updateExerciseProgressChart();
+      } else if (currentChartMode === 'cardio') {
+        renderCardioTrendsChart();
       }
       lucide.createIcons();
     }
 
-    // 圖表 1: 體態趨勢 (依時間升序排列)
+    // 圖表 1: 體態趨勢
     function renderBodyTrendsChart() {
       const ctx = document.getElementById('bodyTrendsChart').getContext('2d');
       if (bodyChartInstance) bodyChartInstance.destroy();
 
       const sortedData = [...inbodyLogs].sort((a, b) => new Date(a.date) - new Date(b.date));
-      const labels = sortedData.map(d => d.date.slice(5)); // 取 MM-DD
+      const labels = sortedData.map(d => d.date.slice(5));
 
       bodyChartInstance = new Chart(ctx, {
         type: 'line',
@@ -909,8 +1173,7 @@
             tooltip: {
               backgroundColor: 'rgba(28, 25, 23, 0.85)',
               padding: 10,
-              cornerRadius: 12,
-              titleFont: { size: 12, weight: 'bold' }
+              cornerRadius: 12
             }
           },
           scales: {
@@ -935,7 +1198,7 @@
       });
     }
 
-    // 圖表 2: 每日訓練總容量
+    // 圖表 2: 每日重訓總容量
     function renderVolumeTrendsChart() {
       const ctx = document.getElementById('volumeTrendsChart').getContext('2d');
       if (volumeChartInstance) volumeChartInstance.destroy();
@@ -1013,7 +1276,6 @@
       if (!selectedExercise) return;
 
       const filtered = workoutLogs.filter(w => w.exercise === selectedExercise);
-      // 依日期分組取每日最高 1RM
       const max1rmByDate = {};
       filtered.forEach(item => {
         if (!max1rmByDate[item.date] || item.oneRM > max1rmByDate[item.date]) {
@@ -1066,33 +1328,128 @@
       });
     }
 
+    // 圖表 4: 新增有氧趨勢圖 (時長 + 距離)
+    function renderCardioTrendsChart() {
+      const ctx = document.getElementById('cardioTrendsChart').getContext('2d');
+      if (cardioChartInstance) cardioChartInstance.destroy();
+
+      const cardioByDate = {};
+      cardioLogs.forEach(c => {
+        if (!cardioByDate[c.date]) {
+          cardioByDate[c.date] = { duration: 0, distance: 0 };
+        }
+        cardioByDate[c.date].duration += c.duration;
+        cardioByDate[c.date].distance += c.distance;
+      });
+
+      const sortedDates = Object.keys(cardioByDate).sort((a, b) => new Date(a) - new Date(b));
+      const labels = sortedDates.map(d => d.slice(5));
+      const durations = sortedDates.map(d => cardioByDate[d].duration);
+      const distances = sortedDates.map(d => Math.round(cardioByDate[d].distance * 10) / 10);
+
+      cardioChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['尚未有有氧紀錄'],
+          datasets: [
+            {
+              type: 'bar',
+              label: '時長 (分鐘)',
+              data: durations,
+              backgroundColor: 'rgba(245, 158, 11, 0.65)',
+              hoverBackgroundColor: '#f59e0b',
+              borderRadius: 6,
+              yAxisID: 'yMins'
+            },
+            {
+              type: 'line',
+              label: '距離 (km)',
+              data: distances,
+              borderColor: '#fb7185',
+              backgroundColor: 'transparent',
+              tension: 0.35,
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: '#fb7185',
+              yAxisID: 'yDist'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(28, 25, 23, 0.85)',
+              padding: 10,
+              cornerRadius: 12
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            },
+            yMins: {
+              type: 'linear',
+              position: 'left',
+              grid: { color: '#f4ece3' },
+              ticks: { font: { size: 10 }, color: '#d97706' },
+              title: { display: true, text: '分鐘', font: { size: 9 }, color: '#d97706' }
+            },
+            yDist: {
+              type: 'linear',
+              position: 'right',
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#fb7185' },
+              title: { display: true, text: 'km', font: { size: 9 }, color: '#fb7185' }
+            }
+          }
+        }
+      });
+    }
+
     function renderAllHistory() {
       const container = document.getElementById('allWorkoutsHistoryList');
-      if (workoutLogs.length === 0) {
-        container.innerHTML = `<p class="text-center text-xs text-stone-400 py-6">尚未有任何歷史訓練紀錄</p>`;
+      const allDates = Array.from(new Set([
+        ...workoutLogs.map(w => w.date),
+        ...cardioLogs.map(c => c.date)
+      ])).sort((a, b) => new Date(b) - new Date(a));
+
+      if (allDates.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-stone-400 py-6">尚未有任何歷史訓練或有氧紀錄</p>`;
         return;
       }
 
-      const groups = {};
-      workoutLogs.forEach(it => {
-        if (!groups[it.date]) groups[it.date] = [];
-        groups[it.date].push(it);
-      });
+      container.innerHTML = allDates.map(date => {
+        const dayWorkouts = workoutLogs.filter(w => w.date === date);
+        const dayCardio = cardioLogs.filter(c => c.date === date);
+        const dayVol = dayWorkouts.reduce((s, it) => s + it.volume, 0);
+        const dayMins = dayCardio.reduce((s, c) => s + c.duration, 0);
 
-      const sortedDates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
-
-      container.innerHTML = sortedDates.map(date => {
-        const items = groups[date];
-        const dayVol = items.reduce((s, it) => s + it.volume, 0);
         return `
           <div class="bg-rose-50/40 rounded-2xl p-3.5 border border-rose-100/70 space-y-2">
             <div class="flex items-center justify-between border-b border-rose-100/60 pb-1.5">
               <span class="font-bold text-xs text-rose-500">${date}</span>
-              <span class="text-[11px] font-semibold text-stone-500">總容量: ${dayVol.toLocaleString()} kg</span>
+              <div class="flex items-center gap-2 text-[11px] font-semibold text-stone-500">
+                ${dayVol > 0 ? `<span>容量: ${dayVol.toLocaleString()} kg</span>` : ''}
+                ${dayMins > 0 ? `<span class="text-amber-600">有氧: ${dayMins} 分鐘</span>` : ''}
+              </div>
             </div>
+            
             <div class="space-y-1">
-              ${items.map(it => `
-                <div class="flex justify-between items-center text-xs py-0.5">
+              ${dayCardio.map(cd => `
+                <div class="flex justify-between items-center text-xs py-1 px-1.5 rounded-lg bg-amber-50/60">
+                  <span class="text-amber-800 font-bold flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> ${cd.activity}
+                  </span>
+                  <span class="text-stone-500 text-[11px]">${cd.duration}分 · 速度 ${cd.speed}km/h · <strong>${cd.distance}km</strong></span>
+                </div>
+              `).join('')}
+
+              ${dayWorkouts.map(it => `
+                <div class="flex justify-between items-center text-xs py-0.5 px-1.5">
                   <span class="text-stone-700">${it.exercise}</span>
                   <span class="text-stone-400 text-[11px]">${it.weight} kg × ${it.reps} (1RM: ${it.oneRM}kg)</span>
                 </div>
@@ -1103,12 +1460,14 @@
       }).join('');
     }
 
+    // 匯出包含有氧的所有資料
     function exportAllData() {
       const backupPackage = {
         app: 'BloomFit',
-        version: 2.1,
+        version: 3.0,
         exportedAt: new Date().toISOString(),
         workouts: workoutLogs,
+        cardio: cardioLogs,
         inbody: inbodyLogs
       };
 
@@ -1122,6 +1481,7 @@
       showToast('備份檔案已成功下載！');
     }
 
+    // 匯入還原
     function importAllData(event) {
       const file = event.target.files[0];
       if (!file) return;
@@ -1133,6 +1493,10 @@
           if (imported.workouts && Array.isArray(imported.workouts)) {
             workoutLogs = imported.workouts;
             localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutLogs));
+          }
+          if (imported.cardio && Array.isArray(imported.cardio)) {
+            cardioLogs = imported.cardio;
+            localStorage.setItem(STORAGE_KEY_CARDIO, JSON.stringify(cardioLogs));
           }
           if (imported.inbody && Array.isArray(imported.inbody)) {
             inbodyLogs = imported.inbody;
