@@ -3,297 +3,516 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>IronTrack 重訓日誌</title>
+  <title>BloomFit 柔美重訓與體態日誌</title>
   
-  <!-- iOS PWA 專用標籤 -->
+  <!-- iOS PWA 支援 -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="IronTrack">
-  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-title" content="BloomFit">
+  <meta name="theme-color" content="#fff8f8">
   
-  <!-- Web App Manifest (Data URI) -->
-  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22IronTrack%20%E9%87%8D%E8%A8%93%E6%97%A5%E8%AA%8C%22%2C%22short_name%22%3A%22IronTrack%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%230f172a%22%2C%22theme_color%22%3A%22%230f172a%22%7D">
+  <!-- PWA Manifest Data URI -->
+  <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22BloomFit%20%E9%AB%94%E6%85%8B%E6%97%A5%E8%AA%8C%22%2C%22short_name%22%3A%22BloomFit%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23fff8f8%22%2C%22theme_color%22%3A%22%23fb7185%22%7D">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
+  <!-- Google Font: Plus Jakarta Sans & Noto Sans TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '"Noto Sans TC"', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            rosebud: {
+              50: '#fff5f6',
+              100: '#ffe8ec',
+              200: '#ffd4dc',
+              300: '#ffb0be',
+              400: '#fb7185',
+              500: '#f43f5e',
+              600: '#e11d48',
+            },
+            cream: {
+              50: '#fdfbf9',
+              100: '#faf5f0',
+              200: '#f4ece3',
+              300: '#e8dbce',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    /* 適配 iPhone 頂部動態島 / 瀏海與底部安全區域 */
+    /* 適應 iPhone 頂部安全區 (瀏海 / 動態島) 與 底部 Home Bar */
     body {
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
+      padding-top: max(env(safe-area-inset-top), 16px);
+      padding-bottom: calc(max(env(safe-area-inset-bottom), 16px) + 76px);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      background-color: #fff9fa;
     }
-    input {
+    input, select, textarea {
       user-select: auto;
+    }
+    /* 平滑過渡 */
+    .tab-content {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s ease-in-out;
+    }
+    .tab-content.active {
+      display: block;
+      opacity: 1;
+    }
+    /* 自訂捲軸隱藏 */
+    ::-webkit-scrollbar {
+      display: none;
     }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500 selection:text-black">
+<body class="text-stone-700 antialiased min-h-screen">
 
-  <!-- 頂部導航列 -->
-  <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-2">
-      <div class="bg-amber-500 text-black p-2 rounded-xl flex items-center justify-center font-black">
-        <i data-lucide="dumbbell" class="w-5 h-5"></i>
+  <!-- 頂部精緻標頭 -->
+  <header class="sticky top-0 z-30 bg-rosebud-50/90 backdrop-blur-md px-5 py-3.5 border-b border-rose-100 flex items-center justify-between">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-400 to-rose-300 text-white flex items-center justify-center shadow-sm shadow-rose-200">
+        <i data-lucide="sparkles" class="w-5 h-5"></i>
       </div>
       <div>
-        <h1 class="text-lg font-bold tracking-tight text-white leading-tight">IronTrack</h1>
-        <p class="text-xs text-slate-400" id="currentDateDisplay">載入中...</p>
+        <h1 class="text-base font-extrabold tracking-tight text-stone-800 leading-tight">BloomFit</h1>
+        <p class="text-[11px] font-medium text-rose-400" id="currentDateDisplay">今天</p>
       </div>
     </div>
-    <div class="flex items-center gap-2">
-      <!-- 休息計時器微縮指示 -->
-      <button onclick="toggleTimerModal()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-amber-400 border border-slate-700 transition">
-        <i data-lucide="timer" class="w-4 h-4"></i>
-        <span id="quickTimerBadge">00:00</span>
-      </button>
+    <div class="flex items-center gap-1.5 bg-white/80 border border-rose-100/80 px-2.5 py-1 rounded-full text-xs font-semibold text-rose-500 shadow-sm">
+      <i data-lucide="heart" class="w-3.5 h-3.5 fill-rose-400 text-rose-400"></i>
+      <span id="headerMotivation">遇見更好的自己</span>
     </div>
   </header>
 
-  <main class="max-w-md mx-auto p-4 space-y-4">
-    <!-- 今日進度摘要卡片 -->
-    <section class="grid grid-cols-3 gap-2 bg-slate-900/70 p-3.5 rounded-2xl border border-slate-800/80 shadow-lg">
-      <div class="text-center">
-        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">今日組數</p>
-        <p class="text-xl font-black text-amber-400 mt-0.5" id="statTodaySets">0</p>
+  <!-- 主要內容區 -->
+  <main class="max-w-md mx-auto px-4 pt-4 space-y-4">
+
+    <!-- 頁籤一：重訓紀錄 (Workout Tracker) -->
+    <section id="tab-workout" class="tab-content active space-y-4">
+      <!-- 今日重訓精華卡片 -->
+      <div class="bg-gradient-to-br from-white via-rose-50/40 to-rose-100/50 p-4 rounded-3xl border border-rose-100 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-stone-600">
+            <i data-lucide="activity" class="w-4 h-4 text-rose-400"></i> 今日運動成效
+          </div>
+          <span class="text-[11px] px-2 py-0.5 rounded-full bg-rose-200/50 text-rose-600 font-semibold" id="todayWorkoutTag">
+            0 個動作
+          </span>
+        </div>
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">總組數</span>
+            <p class="text-lg font-black text-rose-500 mt-0.5" id="statTodaySets">0</p>
+          </div>
+          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">總容量</span>
+            <p class="text-lg font-black text-stone-800 mt-0.5"><span id="statTodayVolume">0</span><span class="text-[11px] font-medium text-stone-400 ml-0.5">kg</span></p>
+          </div>
+          <div class="bg-white/90 py-2.5 rounded-2xl border border-rose-50 shadow-xs">
+            <span class="text-[10px] font-medium text-stone-400 uppercase tracking-wide">最高 1RM</span>
+            <p class="text-lg font-black text-rose-400 mt-0.5"><span id="statTodayMax1RM">0</span><span class="text-[11px] font-medium text-stone-400 ml-0.5">kg</span></p>
+          </div>
+        </div>
       </div>
-      <div class="text-center border-x border-slate-800">
-        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">總容量 (kg)</p>
-        <p class="text-xl font-black text-white mt-0.5" id="statTodayVolume">0</p>
+
+      <!-- 新增訓練輸入表單 -->
+      <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-sm font-bold text-stone-800 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span> 記錄一組訓練
+          </h2>
+          <span class="text-[11px] text-rose-400 font-semibold" id="estimated1rmDisplay">預估 1RM: -- kg</span>
+        </div>
+
+        <!-- 訓練部位快速標籤 -->
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-400 mb-1.5 uppercase">選擇部位</label>
+          <div class="grid grid-cols-4 gap-1.5">
+            <button type="button" onclick="selectMuscleGroup('臀腿', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition">臀腿</button>
+            <button type="button" onclick="selectMuscleGroup('背部', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">背部</button>
+            <button type="button" onclick="selectMuscleGroup('胸肩', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">胸肩</button>
+            <button type="button" onclick="selectMuscleGroup('核心/手臂', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">核心手臂</button>
+          </div>
+        </div>
+
+        <!-- 動作名稱輸入 -->
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-400 mb-1 uppercase">動作名稱</label>
+          <div class="relative">
+            <input list="presetExercises" id="inputExercise" type="text" placeholder="例：臀推、羅馬尼亞硬舉、酒杯深蹲"
+              class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition">
+            <datalist id="presetExercises">
+              <option value="槓鈴臀推 (Hip Thrust)"></option>
+              <option value="啞鈴高腳杯深蹲 (Goblet Squat)"></option>
+              <option value="啞鈴羅馬尼亞硬舉 (RDL)"></option>
+              <option value="保加利亞分腿蹲 (Bulgarian Split Squat)"></option>
+              <option value="滑輪下拉 (Lat Pulldown)"></option>
+              <option value="坐姿划船 (Seated Row)"></option>
+              <option value="啞鈴臥推 (Dumbbell Bench Press)"></option>
+              <option value="啞鈴側平舉 (Lateral Raise)"></option>
+            </datalist>
+          </div>
+        </div>
+
+        <!-- 重量與次數 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-rose-50/40 p-3 rounded-2xl border border-rose-100/60 text-center">
+            <span class="text-[11px] font-semibold text-stone-500 block mb-1">重量 (kg)</span>
+            <input id="inputWeight" type="number" step="0.5" min="0" placeholder="0.0"
+              class="w-full bg-white border border-rose-200 rounded-xl py-2 text-center text-lg font-black text-rose-600 focus:outline-none focus:border-rose-400"
+              oninput="onSetInputChanged()">
+            <div class="flex justify-center gap-1.5 mt-2">
+              <button type="button" onclick="adjustWeight(-2.5)" class="text-[11px] px-2 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">-2.5</button>
+              <button type="button" onclick="adjustWeight(1.25)" class="text-[11px] px-2 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">+1.25</button>
+              <button type="button" onclick="adjustWeight(2.5)" class="text-[11px] px-2 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">+2.5</button>
+            </div>
+          </div>
+
+          <div class="bg-rose-50/40 p-3 rounded-2xl border border-rose-100/60 text-center">
+            <span class="text-[11px] font-semibold text-stone-500 block mb-1">次數 (Reps)</span>
+            <input id="inputReps" type="number" step="1" min="1" placeholder="0"
+              class="w-full bg-white border border-rose-200 rounded-xl py-2 text-center text-lg font-black text-stone-800 focus:outline-none focus:border-rose-400"
+              oninput="onSetInputChanged()">
+            <div class="flex justify-center gap-1.5 mt-2">
+              <button type="button" onclick="adjustReps(-1)" class="text-[11px] px-2.5 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">-1</button>
+              <button type="button" onclick="adjustReps(1)" class="text-[11px] px-2.5 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">+1</button>
+              <button type="button" onclick="adjustReps(2)" class="text-[11px] px-2.5 py-0.5 bg-white border border-rose-200 rounded-lg text-stone-600 active:scale-95">+2</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 儲存按鈕 -->
+        <button onclick="saveWorkoutSet()" class="w-full py-3.5 bg-gradient-to-r from-rose-400 to-rose-500 hover:from-rose-500 hover:to-rose-600 text-white font-bold rounded-2xl shadow-md shadow-rose-200 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <i data-lucide="plus" class="w-4 h-4"></i> 新增此組紀錄
+        </button>
       </div>
-      <div class="text-center">
-        <p class="text-[11px] font-medium text-slate-400 uppercase tracking-wider">最佳 1RM</p>
-        <p class="text-xl font-black text-emerald-400 mt-0.5" id="statTodayMax1RM">0</p>
+
+      <!-- 今日動作分組紀錄列表 -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h3 class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="calendar-heart" class="w-4 h-4 text-rose-400"></i> 今日清單
+          </h3>
+          <span class="text-xs text-stone-400" id="todaySetsCountText">0 組訓練</span>
+        </div>
+
+        <div id="todaySetsList" class="space-y-2.5">
+          <!-- 動態載入今日紀錄 -->
+        </div>
       </div>
     </section>
 
-    <!-- 輸入區塊 -->
-    <section class="bg-slate-900 p-4 rounded-2xl border border-slate-800 shadow-xl space-y-3.5">
-      <div class="flex items-center justify-between">
-        <span class="text-xs font-semibold text-amber-400 uppercase tracking-wider flex items-center gap-1">
-          <i data-lucide="plus-circle" class="w-4 h-4"></i> 新增訓練組
-        </span>
-        <span class="text-[11px] text-slate-400" id="estimated1rmDisplay">預估 1RM: -- kg</span>
-      </div>
+    <!-- 頁籤二：InBody 體態數據 (Body Composition Tracker) -->
+    <section id="tab-inbody" class="tab-content space-y-4">
+      <!-- 最新數據指標看板 -->
+      <div class="bg-gradient-to-br from-rose-50 via-white to-rose-100/60 p-5 rounded-3xl border border-rose-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between border-b border-rose-100/80 pb-3">
+          <div>
+            <span class="text-[10px] font-bold text-rose-400 uppercase tracking-widest block">LATEST INBODY</span>
+            <h2 class="text-sm font-extrabold text-stone-800">最新量測數值</h2>
+          </div>
+          <span class="text-[11px] text-stone-400" id="inbodyLatestDate">尚未有量測</span>
+        </div>
 
-      <!-- 動作選擇 / 輸入 -->
-      <div>
-        <label class="block text-xs font-medium text-slate-300 mb-1">訓練動作</label>
-        <div class="relative">
-          <input list="exercisesList" id="inputExercise" type="text" placeholder="例：槓鈴臥推、深蹲、硬舉..."
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500">
-          <datalist id="exercisesList">
-            <option value="槓鈴深蹲"></option>
-            <option value="槓鈴臥推"></option>
-            <option value="傳統硬舉"></option>
-            <option value="站姿肩推"></option>
-            <option value="引體向上"></option>
-            <option value="啞鈴划船"></option>
-            <option value="滑輪下拉"></option>
-            <option value="腿推機"></option>
-          </datalist>
+        <div class="grid grid-cols-3 gap-2.5 text-center">
+          <!-- 體重 -->
+          <div class="bg-white p-3 rounded-2xl border border-rose-100/80 shadow-xs">
+            <span class="text-[11px] font-medium text-stone-400">體重</span>
+            <div class="text-lg font-black text-stone-800 mt-0.5">
+              <span id="dashWeight">--</span><span class="text-[10px] text-stone-400 ml-0.5">kg</span>
+            </div>
+            <div class="text-[10px] font-bold mt-1" id="diffWeight">--</div>
+          </div>
+          <!-- 體脂率 -->
+          <div class="bg-white p-3 rounded-2xl border border-rose-100/80 shadow-xs">
+            <span class="text-[11px] font-medium text-stone-400">體脂率</span>
+            <div class="text-lg font-black text-rose-500 mt-0.5">
+              <span id="dashFat">--</span><span class="text-[10px] text-rose-300 ml-0.5">%</span>
+            </div>
+            <div class="text-[10px] font-bold mt-1" id="diffFat">--</div>
+          </div>
+          <!-- 骨骼肌重 -->
+          <div class="bg-white p-3 rounded-2xl border border-rose-100/80 shadow-xs">
+            <span class="text-[11px] font-medium text-stone-400">骨骼肌重</span>
+            <div class="text-lg font-black text-emerald-500 mt-0.5">
+              <span id="dashMuscle">--</span><span class="text-[10px] text-emerald-300 ml-0.5">kg</span>
+            </div>
+            <div class="text-[10px] font-bold mt-1" id="diffMuscle">--</div>
+          </div>
         </div>
-      </div>
 
-      <!-- 重量、次數、RPE -->
-      <div class="grid grid-cols-3 gap-2.5">
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">重量 (kg)</label>
-          <input id="inputWeight" type="number" step="0.5" min="0" placeholder="0.0"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-center text-base font-bold text-white focus:outline-none focus:border-amber-500"
-            oninput="calculatePreview1RM()">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">次數 (Reps)</label>
-          <input id="inputReps" type="number" step="1" min="1" placeholder="0"
-            class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-center text-base font-bold text-white focus:outline-none focus:border-amber-500"
-            oninput="calculatePreview1RM()">
-        </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-300 mb-1">自覺強度 (RPE)</label>
-          <select id="inputRPE" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-2 text-center text-sm font-semibold text-white focus:outline-none focus:border-amber-500">
-            <option value="10">10 (極限)</option>
-            <option value="9.5">9.5</option>
-            <option value="9">9 (剩1下)</option>
-            <option value="8.5">8.5</option>
-            <option value="8" selected>8 (剩2下)</option>
-            <option value="7.5">7.5</option>
-            <option value="7">7 (剩3下)</option>
-            <option value="6">6 (暖身/輕重量)</option>
-          </select>
+        <!-- 次要指標：內臟脂肪 / 基礎代謝 / 骨骼肌率 -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-white/80 p-2.5 rounded-xl border border-rose-50 flex items-center justify-between">
+            <span class="text-stone-400">內臟脂肪等級</span>
+            <span class="font-extrabold text-stone-700" id="dashVisceral">Lv. --</span>
+          </div>
+          <div class="bg-white/80 p-2.5 rounded-xl border border-rose-50 flex items-center justify-between">
+            <span class="text-stone-400">基礎代謝 (BMR)</span>
+            <span class="font-extrabold text-stone-700" id="dashBMR">-- kcal</span>
+          </div>
         </div>
       </div>
 
-      <!-- 快速增減重量按鈕 -->
-      <div class="flex items-center justify-between pt-1 text-xs">
-        <span class="text-slate-500 text-[11px]">快速調重：</span>
-        <div class="flex gap-1.5">
-          <button type="button" onclick="adjustWeight(-2.5)" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 active:bg-slate-700">-2.5</button>
-          <button type="button" onclick="adjustWeight(2.5)" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 active:bg-slate-700">+2.5</button>
-          <button type="button" onclick="adjustWeight(5)" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 active:bg-slate-700">+5</button>
-          <button type="button" onclick="adjustWeight(10)" class="px-2.5 py-1 rounded bg-slate-800 text-slate-300 active:bg-slate-700">+10</button>
+      <!-- InBody 輸入表單 -->
+      <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-bold text-stone-800 flex items-center gap-1.5">
+            <i data-lucide="scale" class="w-4 h-4 text-rose-400"></i> 輸入 InBody 量測資料
+          </h3>
+          <span class="text-[11px] text-stone-400">晨起空腹量測最準確</span>
         </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">量測日期</label>
+            <input id="inbodyDate" type="date"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">體重 (kg) <span class="text-rose-400">*</span></label>
+            <input id="inbodyInputWeight" type="number" step="0.1" placeholder="52.0"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-sm font-bold text-stone-800 focus:outline-none focus:border-rose-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">體脂率 (%) <span class="text-rose-400">*</span></label>
+            <input id="inbodyInputFat" type="number" step="0.1" placeholder="23.5"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-sm font-bold text-rose-500 focus:outline-none focus:border-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">骨骼肌重 (kg) <span class="text-rose-400">*</span></label>
+            <input id="inbodyInputMuscle" type="number" step="0.1" placeholder="21.5"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-sm font-bold text-emerald-600 focus:outline-none focus:border-rose-400">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">內臟脂肪級數 (選填)</label>
+            <input id="inbodyInputVisceral" type="number" step="1" min="1" max="20" placeholder="例：3"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-stone-500 mb-1">基礎代謝 BMR (kcal)</label>
+            <input id="inbodyInputBMR" type="number" step="1" placeholder="例：1180"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+          </div>
+        </div>
+
+        <button onclick="saveInBodyRecord()" class="w-full py-3.5 bg-gradient-to-r from-rose-400 to-rose-500 hover:from-rose-500 text-white font-bold rounded-2xl shadow-md shadow-rose-200 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <i data-lucide="check" class="w-4 h-4"></i> 儲存 InBody 數據
+        </button>
       </div>
 
-      <!-- 記錄按鈕 -->
-      <button onclick="saveSet()" class="w-full mt-2 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold rounded-xl shadow-md active:scale-[0.98] transition flex items-center justify-center gap-2">
-        <i data-lucide="check" class="w-5 h-5"></i> 記錄此組並開始計時
-      </button>
+      <!-- InBody 歷史列表 -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between px-1">
+          <h4 class="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="history" class="w-4 h-4 text-rose-400"></i> 量測歷史紀錄
+          </h4>
+          <span class="text-xs text-stone-400" id="inbodyHistoryCountText">0 筆</span>
+        </div>
+        <div id="inbodyHistoryList" class="space-y-2.5"></div>
+      </div>
     </section>
 
-    <!-- 今日訓練紀錄列表 -->
-    <section class="space-y-3">
-      <div class="flex items-center justify-between px-1">
-        <h2 class="text-sm font-bold text-slate-300 tracking-wide flex items-center gap-1.5">
-          <i data-lucide="calendar" class="w-4 h-4 text-amber-500"></i> 今日清單
-        </h2>
-        <span id="setCounter" class="text-xs text-slate-500">共 0 組</span>
+    <!-- 頁籤三：歷史紀錄與數據備份 (History & Backup) -->
+    <section id="tab-history" class="tab-content space-y-4">
+      <!-- 訓練歷史清單 -->
+      <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-3">
+        <h3 class="text-sm font-bold text-stone-800 flex items-center gap-2">
+          <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i> 重訓歷程回顧
+        </h3>
+        <p class="text-xs text-stone-400">依照每次訓練日期分類檢視總容量與組數細節。</p>
+        <div id="allWorkoutsHistoryList" class="space-y-3 pt-2">
+          <!-- 動態載入完整訓練紀錄 -->
+        </div>
       </div>
 
-      <div id="todaySetsContainer" class="space-y-2">
-        <!-- 動態渲染紀錄 -->
+      <!-- 資料備份與安全性管理 -->
+      <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-4">
+        <h3 class="text-sm font-bold text-stone-800 flex items-center gap-2">
+          <i data-lucide="cloud-check" class="w-4 h-4 text-rose-400"></i> 匯出與還原（換手機必備）
+        </h3>
+        <p class="text-xs text-stone-400 leading-relaxed">
+          所有數據都安靜儲存在這隻 iPhone 本機上。更換手機或定期維護時，點擊下方即可將<strong>重訓與 InBody 數據</strong>一次打包匯出成單一備份檔案。
+        </p>
+
+        <div class="grid grid-cols-2 gap-2.5 pt-1">
+          <button onclick="exportAllData()" class="py-3 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="download" class="w-4 h-4"></i> 匯出備份檔案
+          </button>
+          <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importAllData(event)">
+          <button onclick="document.getElementById('importFileInput').click()" class="py-3 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition">
+            <i data-lucide="upload" class="w-4 h-4"></i> 匯入並還原
+          </button>
+        </div>
       </div>
     </section>
   </main>
 
-  <!-- 底部選單 -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/90 backdrop-blur-lg border-t border-slate-800/80 px-6 py-2 flex justify-around items-center z-30">
-    <button onclick="switchTab('tracker')" id="tabBtnTracker" class="flex flex-col items-center gap-1 text-amber-500">
-      <i data-lucide="clipboard-list" class="w-5 h-5"></i>
-      <span class="text-[11px] font-semibold">記訓練</span>
+  <!-- 底部固定風格導航列 -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-rose-100/80 px-8 py-2.5 flex justify-around items-center z-40">
+    <button onclick="switchTab('workout')" id="navBtn-workout" class="nav-item flex flex-col items-center gap-1 text-rose-500 font-bold">
+      <i data-lucide="dumbbell" class="w-5 h-5"></i>
+      <span class="text-[11px]">記訓練</span>
     </button>
-    <button onclick="switchTab('history')" id="tabBtnHistory" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
+    <button onclick="switchTab('inbody')" id="navBtn-inbody" class="nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold">
+      <i data-lucide="scale" class="w-5 h-5"></i>
+      <span class="text-[11px]">InBody</span>
+    </button>
+    <button onclick="switchTab('history')" id="navBtn-history" class="nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold">
       <i data-lucide="history" class="w-5 h-5"></i>
-      <span class="text-[11px] font-semibold">歷史</span>
-    </button>
-    <button onclick="toggleTimerModal()" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
-      <i data-lucide="timer" class="w-5 h-5"></i>
-      <span class="text-[11px] font-semibold">計時器</span>
-    </button>
-    <button onclick="switchTab('backup')" id="tabBtnBackup" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200">
-      <i data-lucide="database" class="w-5 h-5"></i>
-      <span class="text-[11px] font-semibold">備份</span>
+      <span class="text-[11px]">歷史備份</span>
     </button>
   </nav>
 
-  <!-- 歷史紀錄視窗 (Tab Modal) -->
-  <div id="historyModal" class="hidden fixed inset-0 z-50 bg-slate-950 p-4 pt-12 overflow-y-auto">
-    <div class="max-w-md mx-auto space-y-4">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <i data-lucide="history" class="text-amber-500"></i> 所有訓練歷史
-        </h2>
-        <button onclick="switchTab('tracker')" class="p-1 rounded-lg bg-slate-800 text-slate-300">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div id="fullHistoryContainer" class="space-y-4"></div>
-    </div>
-  </div>
-
-  <!-- 資料備份與管理視窗 -->
-  <div id="backupModal" class="hidden fixed inset-0 z-50 bg-slate-950 p-4 pt-12 overflow-y-auto">
-    <div class="max-w-md mx-auto space-y-5">
-      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <i data-lucide="database" class="text-amber-500"></i> 資料備份與還原
-        </h2>
-        <button onclick="switchTab('tracker')" class="p-1 rounded-lg bg-slate-800 text-slate-300">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-semibold text-white">匯出訓練資料 (JSON)</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">更換手機或定期備份時，可將所有訓練資料下載成單一檔案儲存在「檔案」App 或 iCloud 中。</p>
-        <button onclick="exportData()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold text-sm rounded-lg flex items-center justify-center gap-2">
-          <i data-lucide="download" class="w-4 h-4"></i> 匯出備份檔案
-        </button>
-      </div>
-      <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
-        <h3 class="text-sm font-semibold text-white">匯入還原資料</h3>
-        <p class="text-xs text-slate-400 leading-relaxed">選取先前匯出的 JSON 檔案進行還原。</p>
-        <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="importData(event)">
-        <button onclick="document.getElementById('importFileInput').click()" class="w-full py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-sm rounded-lg flex items-center justify-center gap-2">
-          <i data-lucide="upload" class="w-4 h-4"></i> 選取檔案並還原
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 組間休息浮層/面板 -->
-  <div id="timerModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-800 p-6 rounded-3xl w-full max-w-xs text-center space-y-5 shadow-2xl">
-      <div class="flex justify-between items-center text-slate-400">
-        <span class="text-xs font-semibold uppercase tracking-wider text-amber-400">組間休息計時</span>
-        <button onclick="toggleTimerModal()" class="text-slate-400 hover:text-white">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      
-      <div class="relative py-4">
-        <div class="text-6xl font-black tracking-tight text-white font-mono" id="modalTimerDisplay">01:30</div>
-        <p class="text-xs text-slate-500 mt-2" id="timerStatusText">計時進行中</p>
-      </div>
-
-      <!-- 快速秒數選擇 -->
-      <div class="grid grid-cols-4 gap-2">
-        <button onclick="setTimerSeconds(60)" class="py-1.5 rounded-lg bg-slate-800 text-xs font-semibold text-slate-300">60s</button>
-        <button onclick="setTimerSeconds(90)" class="py-1.5 rounded-lg bg-slate-800 text-xs font-semibold text-amber-400 border border-amber-500/30">90s</button>
-        <button onclick="setTimerSeconds(120)" class="py-1.5 rounded-lg bg-slate-800 text-xs font-semibold text-slate-300">2m</button>
-        <button onclick="setTimerSeconds(180)" class="py-1.5 rounded-lg bg-slate-800 text-xs font-semibold text-slate-300">3m</button>
-      </div>
-
-      <div class="flex gap-2">
-        <button onclick="toggleTimerRunning()" id="timerToggleBtn" class="flex-1 py-3 bg-amber-500 text-black font-bold rounded-xl">暫停</button>
-        <button onclick="resetTimer()" class="px-4 py-3 bg-slate-800 text-slate-300 font-semibold rounded-xl">重置</button>
-      </div>
-    </div>
+  <!-- 客製化彈出提示訊息 (Toast) -->
+  <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-50 bg-stone-900/90 text-white text-xs font-semibold px-4 py-2.5 rounded-full shadow-lg opacity-0 pointer-events-none transition-all duration-300">
+    提示訊息
   </div>
 
   <script>
-    // --- 核心資料狀態管理 ---
-    const STORAGE_KEY = 'irontrack_workouts_v1';
-    let workouts = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    // --- 儲存庫鍵名 ---
+    const STORAGE_KEY_WORKOUTS = 'bloomfit_workouts_v2';
+    const STORAGE_KEY_INBODY = 'bloomfit_inbody_v2';
 
-    // 計時器狀態
-    let timerTotalSeconds = 90;
-    let timerRemainingSeconds = 90;
-    let timerInterval = null;
-    let isTimerRunning = false;
+    // 狀態變數
+    let workoutLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_WORKOUTS) || '[]');
+    let inbodyLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_INBODY) || '[]');
+    let currentMuscleGroup = '臀腿';
 
-    // 初始化日期
-    function initDate() {
-      const today = new Date();
-      const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' };
-      document.getElementById('currentDateDisplay').textContent = today.toLocaleDateString('zh-TW', options);
-    }
+    // 激勵金句隨機切換
+    const MOTIVATIONS = [
+      '今天的妳比昨天更有力量 ✨',
+      '每一組努力都不會白費 💕',
+      '專注線條，享受汗水 🌸',
+      '遇見更好的自己 🌷',
+      '肌肉是最好的緊緻緊身衣 💫'
+    ];
 
+    // 日期工具
     function getTodayString() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     }
 
-    // --- 1RM 計算 (Brzycki Formula: Weight / (1.0278 - (0.0278 * Reps))) ---
-    function calculate1RM(weight, reps) {
-      if (reps === 1) return weight;
-      if (reps > 10) {
-        // 大於 10 次使用 Epley 公式
-        return Math.round(weight * (1 + reps / 30) * 10) / 10;
+    function initHeader() {
+      const today = new Date();
+      const options = { month: 'short', day: 'numeric', weekday: 'short' };
+      document.getElementById('currentDateDisplay').textContent = today.toLocaleDateString('zh-TW', options);
+      
+      const randomQuote = MOTIVATIONS[Math.floor(Math.random() * MOTIVATIONS.length)];
+      document.getElementById('headerMotivation').textContent = randomQuote;
+      document.getElementById('inbodyDate').value = getTodayString();
+    }
+
+    // --- 訊息提示視窗 (Toast) 替代 alert ---
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+      toast.classList.add('opacity-100', 'translate-y-0');
+      setTimeout(() => {
+        toast.classList.remove('opacity-100', 'translate-y-0');
+        toast.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+      }, 2200);
+    }
+
+    // --- 頁籤切換 ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => {
+        el.className = 'nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold';
+      });
+
+      const activeSection = document.getElementById(`tab-${tabId}`);
+      const activeNav = document.getElementById(`navBtn-${tabId}`);
+      if (activeSection) activeSection.classList.add('active');
+      if (activeNav) activeNav.className = 'nav-item flex flex-col items-center gap-1 text-rose-500 font-bold';
+
+      if (tabId === 'workout') renderTodayWorkout();
+      if (tabId === 'inbody') renderInBodyDashboard();
+      if (tabId === 'history') renderAllHistory();
+    }
+
+    // --- 部位選取邏輯 ---
+    function selectMuscleGroup(group, btn) {
+      currentMuscleGroup = group;
+      document.querySelectorAll('.muscle-group-btn').forEach(b => {
+        b.className = 'muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition';
+      });
+      btn.className = 'muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition';
+
+      // 依部位切換常用預設動作提示
+      const datalist = document.getElementById('presetExercises');
+      if (group === '臀腿') {
+        datalist.innerHTML = `
+          <option value="槓鈴臀推 (Hip Thrust)"></option>
+          <option value="啞鈴高腳杯深蹲 (Goblet Squat)"></option>
+          <option value="啞鈴羅馬尼亞硬舉 (RDL)"></option>
+          <option value="保加利亞分腿蹲 (Bulgarian Split)"></option>
+          <option value="腿推機 (Leg Press)"></option>
+          <option value="機械外展 (Hip Abduction)"></option>
+        `;
+      } else if (group === '背部') {
+        datalist.innerHTML = `
+          <option value="滑輪下拉 (Lat Pulldown)"></option>
+          <option value="坐姿划船 (Seated Row)"></option>
+          <option value="單手啞鈴划船 (DB Row)"></option>
+          <option value="輔助引體向上 (Assisted Pull-up)"></option>
+          <option value="臉拉 (Face Pull)"></option>
+        `;
+      } else if (group === '胸肩') {
+        datalist.innerHTML = `
+          <option value="啞鈴臥推 (Dumbbell Bench Press)"></option>
+          <option value="啞鈴側平舉 (Lateral Raise)"></option>
+          <option value="坐姿啞鈴肩推 (Shoulder Press)"></option>
+          <option value="蝴蝶機夾胸 (Pec Fly)"></option>
+        `;
+      } else {
+        datalist.innerHTML = `
+          <option value="三頭下壓 (Tricep Pushdown)"></option>
+          <option value="二頭彎舉 (Bicep Curl)"></option>
+          <option value="棒式核心 (Plank)"></option>
+          <option value="羅馬椅抬腿 (Leg Raise)"></option>
+        `;
       }
+    }
+
+    // --- 重訓計算輔助 ---
+    function calculate1RM(weight, reps) {
+      if (reps <= 0) return 0;
+      if (reps === 1) return weight;
+      if (reps > 10) return Math.round(weight * (1 + reps / 30) * 10) / 10;
       return Math.round((weight / (1.0278 - (0.0278 * reps))) * 10) / 10;
     }
 
-    function calculatePreview1RM() {
+    function onSetInputChanged() {
       const w = parseFloat(document.getElementById('inputWeight').value) || 0;
       const r = parseInt(document.getElementById('inputReps').value) || 0;
       const display = document.getElementById('estimated1rmDisplay');
       if (w > 0 && r > 0) {
-        const est = calculate1RM(w, r);
-        display.textContent = `預估 1RM: ${est} kg`;
+        display.textContent = `預估 1RM: ${calculate1RM(w, r)} kg`;
       } else {
         display.textContent = '預估 1RM: -- kg';
       }
@@ -302,115 +521,249 @@
     function adjustWeight(delta) {
       const input = document.getElementById('inputWeight');
       const val = parseFloat(input.value) || 0;
-      input.value = Math.max(0, val + delta);
-      calculatePreview1RM();
+      input.value = Math.max(0, Math.round((val + delta) * 100) / 100);
+      onSetInputChanged();
     }
 
-    // --- 儲存單組紀錄 ---
-    function saveSet() {
+    function adjustReps(delta) {
+      const input = document.getElementById('inputReps');
+      const val = parseInt(input.value) || 0;
+      input.value = Math.max(1, val + delta);
+      onSetInputChanged();
+    }
+
+    // --- 儲存單組訓練 ---
+    function saveWorkoutSet() {
       const exercise = document.getElementById('inputExercise').value.trim();
       const weight = parseFloat(document.getElementById('inputWeight').value);
       const reps = parseInt(document.getElementById('inputReps').value);
-      const rpe = parseFloat(document.getElementById('inputRPE').value);
 
       if (!exercise) {
-        alert('請填寫動作名稱！');
+        showToast('請輸入或選擇動作名稱 ✨');
         return;
       }
       if (isNaN(weight) || isNaN(reps) || reps <= 0) {
-        alert('請填入有效的重量與次數！');
+        showToast('請填寫正確的重量與次數');
         return;
       }
 
       const newRecord = {
-        id: 'rec_' + Date.now(),
+        id: 'ws_' + Date.now(),
         date: getTodayString(),
         timestamp: Date.now(),
+        group: currentMuscleGroup,
         exercise: exercise,
         weight: weight,
         reps: reps,
-        rpe: rpe,
         volume: weight * reps,
-        estimated1RM: calculate1RM(weight, reps)
+        oneRM: calculate1RM(weight, reps)
       };
 
-      workouts.unshift(newRecord);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
+      workoutLogs.unshift(newRecord);
+      localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutLogs));
 
-      // 觸發震動回饋 (iOS 支援特定 Haptic)
-      if (navigator.vibrate) {
-        navigator.vibrate([40, 60, 40]);
-      }
-
-      // 自動重置並開始休息計時器
-      startTimer();
-      renderTodaySets();
+      showToast(`已記錄：${exercise} ${weight}kg × ${reps}次 💕`);
+      renderTodayWorkout();
     }
 
-    // 刪除單組紀錄
-    function deleteSet(id) {
-      if (confirm('確定刪除此組紀錄嗎？')) {
-        workouts = workouts.filter(item => item.id !== id);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-        renderTodaySets();
-      }
+    function deleteWorkoutSet(id) {
+      workoutLogs = workoutLogs.filter(item => item.id !== id);
+      localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutLogs));
+      showToast('已刪除此組紀錄');
+      renderTodayWorkout();
+      renderAllHistory();
     }
 
-    // --- 渲染今日畫面與數據 ---
-    function renderTodaySets() {
+    // --- 渲染今日重訓清單與卡片 ---
+    function renderTodayWorkout() {
       const todayStr = getTodayString();
-      const todayList = workouts.filter(item => item.date === todayStr);
-      const container = document.getElementById('todaySetsContainer');
+      const todayList = workoutLogs.filter(item => item.date === todayStr);
+      const container = document.getElementById('todaySetsList');
 
-      // 更新統計
-      let totalVolume = 0;
+      let totalVol = 0;
       let max1RM = 0;
+      const uniqueExercises = new Set();
+
       todayList.forEach(item => {
-        totalVolume += item.volume;
-        if (item.estimated1RM > max1RM) max1RM = item.estimated1RM;
+        totalVol += item.volume;
+        if (item.oneRM > max1RM) max1RM = item.oneRM;
+        uniqueExercises.add(item.exercise);
       });
 
       document.getElementById('statTodaySets').textContent = todayList.length;
-      document.getElementById('statTodayVolume').textContent = totalVolume.toLocaleString();
-      document.getElementById('statTodayMax1RM').textContent = max1RM ? `${max1RM}` : '0';
-      document.getElementById('setCounter').textContent = `共 ${todayList.length} 組`;
+      document.getElementById('statTodayVolume').textContent = totalVol.toLocaleString();
+      document.getElementById('statTodayMax1RM').textContent = max1RM ? max1RM : '0';
+      document.getElementById('todayWorkoutTag').textContent = `${uniqueExercises.size} 個動作`;
+      document.getElementById('todaySetsCountText').textContent = `共 ${todayList.length} 組訓練`;
 
       if (todayList.length === 0) {
         container.innerHTML = `
-          <div class="text-center py-10 bg-slate-900/40 rounded-2xl border border-dashed border-slate-800 text-slate-500">
-            <i data-lucide="dumbbell" class="w-8 h-8 mx-auto stroke-1 opacity-50 mb-2"></i>
-            <p class="text-xs">今天還沒有紀錄，開始你的第一組吧！</p>
+          <div class="text-center py-8 bg-white/70 rounded-3xl border border-dashed border-rose-200 text-stone-400 space-y-1">
+            <i data-lucide="flower" class="w-7 h-7 mx-auto stroke-1 text-rose-300"></i>
+            <p class="text-xs">今天還沒開始訓練，給自己一點時間動一動吧 ✨</p>
           </div>
         `;
         lucide.createIcons();
         return;
       }
 
-      container.innerHTML = todayList.map((item, idx) => {
-        const setIndex = todayList.length - idx;
-        const timeStr = new Date(item.timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+      // 按動作分組顯示
+      const grouped = {};
+      todayList.forEach(item => {
+        if (!grouped[item.exercise]) grouped[item.exercise] = [];
+        grouped[item.exercise].push(item);
+      });
+
+      container.innerHTML = Object.keys(grouped).map(exName => {
+        const sets = grouped[exName];
+        const exVol = sets.reduce((s, it) => s + it.volume, 0);
         return `
-          <div class="bg-slate-900 border border-slate-800 p-3.5 rounded-xl flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-3">
-              <span class="w-6 h-6 rounded-full bg-slate-800 text-amber-500 font-bold text-xs flex items-center justify-center">
-                #${setIndex}
+          <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-xs space-y-2">
+            <div class="flex items-center justify-between border-b border-rose-50 pb-1.5">
+              <span class="font-bold text-xs text-stone-800 flex items-center gap-1.5">
+                <span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-600 text-[10px] font-semibold">${sets[0].group}</span>
+                ${exName}
               </span>
-              <div>
-                <p class="font-bold text-sm text-white">${item.exercise}</p>
-                <div class="flex items-center gap-2 text-xs text-slate-400 mt-0.5">
-                  <span class="text-amber-400 font-semibold">${item.weight} kg × ${item.reps} 次</span>
-                  <span>•</span>
-                  <span>RPE ${item.rpe}</span>
-                  <span>•</span>
-                  <span class="text-[11px] text-slate-500">${timeStr}</span>
+              <span class="text-[11px] font-medium text-rose-400">總量: ${exVol.toLocaleString()} kg</span>
+            </div>
+            <div class="space-y-1">
+              ${sets.map((item, idx) => `
+                <div class="flex items-center justify-between text-xs py-1 px-2 rounded-xl bg-rose-50/30">
+                  <span class="text-stone-400 text-[11px]">第 ${sets.length - idx} 組</span>
+                  <span class="font-bold text-stone-700">${item.weight} kg × ${item.reps} 次</span>
+                  <span class="text-[11px] text-stone-400">1RM: ${item.oneRM}kg</span>
+                  <button onclick="deleteWorkoutSet('${item.id}')" class="text-stone-300 hover:text-rose-400 p-0.5">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                  </button>
                 </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    // --- InBody 邏輯 ---
+    function saveInBodyRecord() {
+      const date = document.getElementById('inbodyDate').value || getTodayString();
+      const weight = parseFloat(document.getElementById('inbodyInputWeight').value);
+      const fat = parseFloat(document.getElementById('inbodyInputFat').value);
+      const muscle = parseFloat(document.getElementById('inbodyInputMuscle').value);
+      const visceral = parseInt(document.getElementById('inbodyInputVisceral').value) || null;
+      const bmr = parseInt(document.getElementById('inbodyInputBMR').value) || null;
+
+      if (isNaN(weight) || isNaN(fat) || isNaN(muscle)) {
+        showToast('請務必填寫體重、體脂率與骨骼肌重！');
+        return;
+      }
+
+      const newInbody = {
+        id: 'ib_' + Date.now(),
+        date: date,
+        timestamp: Date.now(),
+        weight: weight,
+        bodyFat: fat,
+        muscle: muscle,
+        visceral: visceral,
+        bmr: bmr
+      };
+
+      // 檢查是否同日期已存在，存在則更新，否則加入
+      const existingIdx = inbodyLogs.findIndex(item => item.date === date);
+      if (existingIdx !== -1) {
+        inbodyLogs[existingIdx] = newInbody;
+      } else {
+        inbodyLogs.unshift(newInbody);
+      }
+
+      // 依日期重新排序
+      inbodyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
+      localStorage.setItem(STORAGE_KEY_INBODY, JSON.stringify(inbodyLogs));
+
+      showToast('InBody 數據記錄完成 🌸');
+      renderInBodyDashboard();
+    }
+
+    function deleteInBodyRecord(id) {
+      inbodyLogs = inbodyLogs.filter(item => item.id !== id);
+      localStorage.setItem(STORAGE_KEY_INBODY, JSON.stringify(inbodyLogs));
+      showToast('已刪除該筆量測紀錄');
+      renderInBodyDashboard();
+    }
+
+    function renderInBodyDashboard() {
+      const historyList = document.getElementById('inbodyHistoryList');
+      document.getElementById('inbodyHistoryCountText').textContent = `共 ${inbodyLogs.length} 筆`;
+
+      if (inbodyLogs.length === 0) {
+        document.getElementById('dashWeight').textContent = '--';
+        document.getElementById('dashFat').textContent = '--';
+        document.getElementById('dashMuscle').textContent = '--';
+        document.getElementById('dashVisceral').textContent = 'Lv. --';
+        document.getElementById('dashBMR').textContent = '-- kcal';
+        document.getElementById('diffWeight').textContent = '--';
+        document.getElementById('diffFat').textContent = '--';
+        document.getElementById('diffMuscle').textContent = '--';
+        document.getElementById('inbodyLatestDate').textContent = '尚未有量測';
+
+        historyList.innerHTML = `
+          <div class="text-center py-8 bg-white/70 rounded-3xl border border-dashed border-rose-200 text-stone-400 space-y-1">
+            <i data-lucide="scale" class="w-7 h-7 mx-auto stroke-1 text-rose-300"></i>
+            <p class="text-xs">尚無 InBody 量測數據，快記錄你的第一筆吧 💕</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      const latest = inbodyLogs[0];
+      const prev = inbodyLogs.length > 1 ? inbodyLogs[1] : null;
+
+      document.getElementById('inbodyLatestDate').textContent = `上次更新: ${latest.date}`;
+      document.getElementById('dashWeight').textContent = latest.weight.toFixed(1);
+      document.getElementById('dashFat').textContent = latest.bodyFat.toFixed(1);
+      document.getElementById('dashMuscle').textContent = latest.muscle.toFixed(1);
+      document.getElementById('dashVisceral').textContent = latest.visceral ? `Lv. ${latest.visceral}` : '未填';
+      document.getElementById('dashBMR').textContent = latest.bmr ? `${latest.bmr} kcal` : '未填';
+
+      // 差值計算
+      function formatDiff(cur, old, unit = '', inverse = false) {
+        if (!old) return '<span class="text-stone-300 font-normal">首筆紀錄</span>';
+        const diff = Math.round((cur - old) * 10) / 10;
+        if (diff === 0) return `<span class="text-stone-400">持平</span>`;
+        const sign = diff > 0 ? `+${diff}` : `${diff}`;
+        // 體脂增加為負向(粉紅/紅)，肌肉增加為正向(綠)
+        const isGood = inverse ? diff < 0 : diff > 0;
+        const color = isGood ? 'text-emerald-500' : 'text-rose-500';
+        return `<span class="${color}">${sign} ${unit}</span>`;
+      }
+
+      document.getElementById('diffWeight').innerHTML = formatDiff(latest.weight, prev?.weight, 'kg');
+      document.getElementById('diffFat').innerHTML = formatDiff(latest.bodyFat, prev?.bodyFat, '%', true);
+      document.getElementById('diffMuscle').innerHTML = formatDiff(latest.muscle, prev?.muscle, 'kg', false);
+
+      // 歷史列表渲染
+      historyList.innerHTML = inbodyLogs.map((item, idx) => {
+        const nextItem = inbodyLogs[idx + 1] || null;
+        const diffW = nextItem ? Math.round((item.weight - nextItem.weight) * 10) / 10 : null;
+        const diffF = nextItem ? Math.round((item.bodyFat - nextItem.bodyFat) * 10) / 10 : null;
+        return `
+          <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-xs flex items-center justify-between">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-extrabold text-xs text-stone-800">${item.date}</span>
+                ${idx === 0 ? '<span class="px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-500 text-[10px] font-bold">最新</span>' : ''}
+              </div>
+              <div class="flex items-center gap-3 text-xs text-stone-500 mt-1">
+                <span>體重 <strong class="text-stone-700 font-bold">${item.weight}</strong> kg</span>
+                <span>體脂 <strong class="text-rose-500 font-bold">${item.bodyFat}%</strong></span>
+                <span>肌肉 <strong class="text-emerald-600 font-bold">${item.muscle}</strong> kg</span>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <span class="text-right text-[11px] text-slate-400">
-                1RM: <strong class="text-emerald-400 font-semibold">${item.estimated1RM}</strong>
-              </span>
-              <button onclick="deleteSet('${item.id}')" class="text-slate-600 hover:text-rose-500 p-1">
+              <button onclick="deleteInBodyRecord('${item.id}')" class="text-stone-300 hover:text-rose-400 p-1">
                 <i data-lucide="trash-2" class="w-4 h-4"></i>
               </button>
             </div>
@@ -421,154 +774,65 @@
       lucide.createIcons();
     }
 
-    // --- 組間休息計時器邏輯 ---
-    function formatTime(sec) {
-      const m = Math.floor(sec / 60);
-      const s = sec % 60;
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function updateTimerDisplay() {
-      const str = formatTime(timerRemainingSeconds);
-      document.getElementById('modalTimerDisplay').textContent = str;
-      document.getElementById('quickTimerBadge').textContent = str;
-    }
-
-    function startTimer() {
-      clearInterval(timerInterval);
-      timerRemainingSeconds = timerTotalSeconds;
-      isTimerRunning = true;
-      document.getElementById('timerToggleBtn').textContent = '暫停';
-      updateTimerDisplay();
-
-      timerInterval = setInterval(() => {
-        if (timerRemainingSeconds > 0) {
-          timerRemainingSeconds--;
-          updateTimerDisplay();
-        } else {
-          clearInterval(timerInterval);
-          isTimerRunning = false;
-          document.getElementById('timerToggleBtn').textContent = '開始';
-          if (navigator.vibrate) {
-            navigator.vibrate([200, 100, 200, 100, 300]);
-          }
-        }
-      }, 1000);
-    }
-
-    function toggleTimerRunning() {
-      if (isTimerRunning) {
-        clearInterval(timerInterval);
-        isTimerRunning = false;
-        document.getElementById('timerToggleBtn').textContent = '繼續';
-      } else {
-        isTimerRunning = true;
-        document.getElementById('timerToggleBtn').textContent = '暫停';
-        timerInterval = setInterval(() => {
-          if (timerRemainingSeconds > 0) {
-            timerRemainingSeconds--;
-            updateTimerDisplay();
-          } else {
-            clearInterval(timerInterval);
-            isTimerRunning = false;
-            document.getElementById('timerToggleBtn').textContent = '開始';
-          }
-        }, 1000);
-      }
-    }
-
-    function resetTimer() {
-      clearInterval(timerInterval);
-      isTimerRunning = false;
-      timerRemainingSeconds = timerTotalSeconds;
-      document.getElementById('timerToggleBtn').textContent = '開始';
-      updateTimerDisplay();
-    }
-
-    function setTimerSeconds(sec) {
-      timerTotalSeconds = sec;
-      resetTimer();
-      startTimer();
-    }
-
-    function toggleTimerModal() {
-      const modal = document.getElementById('timerModal');
-      modal.classList.toggle('hidden');
-    }
-
-    // --- Tab 切換 ---
-    function switchTab(tab) {
-      document.getElementById('historyModal').classList.add('hidden');
-      document.getElementById('backupModal').classList.add('hidden');
-      
-      document.getElementById('tabBtnTracker').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200';
-      document.getElementById('tabBtnHistory').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200';
-      document.getElementById('tabBtnBackup').className = 'flex flex-col items-center gap-1 text-slate-400 hover:text-slate-200';
-
-      if (tab === 'tracker') {
-        document.getElementById('tabBtnTracker').className = 'flex flex-col items-center gap-1 text-amber-500';
-      } else if (tab === 'history') {
-        document.getElementById('tabBtnHistory').className = 'flex flex-col items-center gap-1 text-amber-500';
-        document.getElementById('historyModal').classList.remove('hidden');
-        renderFullHistory();
-      } else if (tab === 'backup') {
-        document.getElementById('tabBtnBackup').className = 'flex flex-col items-center gap-1 text-amber-500';
-        document.getElementById('backupModal').classList.remove('hidden');
-      }
-    }
-
-    // 渲染歷史全部紀錄 (以日期分組)
-    function renderFullHistory() {
-      const container = document.getElementById('fullHistoryContainer');
-      if (workouts.length === 0) {
-        container.innerHTML = `<p class="text-center text-slate-500 text-sm py-8">尚無任何歷史紀錄</p>`;
+    // --- 完整歷史總覽渲染 ---
+    function renderAllHistory() {
+      const container = document.getElementById('allWorkoutsHistoryList');
+      if (workoutLogs.length === 0) {
+        container.innerHTML = `<p class="text-center text-xs text-stone-400 py-6">尚未有任何歷史訓練紀錄</p>`;
         return;
       }
 
-      // 按日期分組
       const groups = {};
-      workouts.forEach(item => {
-        if (!groups[item.date]) groups[item.date] = [];
-        groups[item.date].push(item);
+      workoutLogs.forEach(it => {
+        if (!groups[it.date]) groups[it.date] = [];
+        groups[it.date].push(it);
       });
 
       const sortedDates = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a));
 
       container.innerHTML = sortedDates.map(date => {
         const items = groups[date];
-        const dayVol = items.reduce((sum, it) => sum + it.volume, 0);
+        const dayVol = items.reduce((s, it) => s + it.volume, 0);
         return `
-          <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-3">
-            <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-              <span class="font-bold text-sm text-amber-400">${date}</span>
-              <span class="text-xs text-slate-400 font-medium">總容量: ${dayVol.toLocaleString()} kg</span>
+          <div class="bg-rose-50/40 rounded-2xl p-3.5 border border-rose-100/70 space-y-2">
+            <div class="flex items-center justify-between border-b border-rose-100/60 pb-1.5">
+              <span class="font-bold text-xs text-rose-500">${date}</span>
+              <span class="text-[11px] font-semibold text-stone-500">總容量: ${dayVol.toLocaleString()} kg</span>
             </div>
-            <div class="space-y-1.5">
+            <div class="space-y-1">
               ${items.map(it => `
-                <div class="flex justify-between items-center text-xs py-1">
-                  <span class="text-slate-300 font-medium">${it.exercise}</span>
-                  <span class="text-slate-400">${it.weight} kg × ${it.reps} (1RM: ${it.estimated1RM}kg)</span>
+                <div class="flex justify-between items-center text-xs py-0.5">
+                  <span class="text-stone-700">${it.exercise}</span>
+                  <span class="text-stone-400 text-[11px]">${it.weight} kg × ${it.reps} (1RM: ${it.oneRM}kg)</span>
                 </div>
               `).join('')}
             </div>
           </div>
         `;
       }).join('');
-      lucide.createIcons();
     }
 
-    // --- 匯出與匯入 ---
-    function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(workouts, null, 2));
+    // --- 資料匯出與匯入 (JSON) ---
+    function exportAllData() {
+      const backupPackage = {
+        app: 'BloomFit',
+        version: 2.0,
+        exportedAt: new Date().toISOString(),
+        workouts: workoutLogs,
+        inbody: inbodyLogs
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupPackage, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `irontrack_backup_${getTodayString()}.json`);
+      downloadAnchor.setAttribute("download", `bloomfit_backup_${getTodayString()}.json`);
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
+      showToast('備份檔案已成功下載！');
     }
 
-    function importData(event) {
+    function importAllData(event) {
       const file = event.target.files[0];
       if (!file) return;
 
@@ -576,17 +840,20 @@
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (Array.isArray(imported)) {
-            workouts = imported;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(workouts));
-            alert('還原成功！');
-            renderTodaySets();
-            switchTab('tracker');
-          } else {
-            alert('檔案格式錯誤！');
+          if (imported.workouts && Array.isArray(imported.workouts)) {
+            workoutLogs = imported.workouts;
+            localStorage.setItem(STORAGE_KEY_WORKOUTS, JSON.stringify(workoutLogs));
           }
+          if (imported.inbody && Array.isArray(imported.inbody)) {
+            inbodyLogs = imported.inbody;
+            localStorage.setItem(STORAGE_KEY_INBODY, JSON.stringify(inbodyLogs));
+          }
+          showToast('資料還原成功！🌷');
+          renderTodayWorkout();
+          renderInBodyDashboard();
+          switchTab('inbody');
         } catch (err) {
-          alert('讀取失敗，請確認是否為正確的 JSON 備份檔。');
+          showToast('檔案格式不符，請確認是正確的備份檔。');
         }
       };
       reader.readAsText(file);
@@ -594,8 +861,9 @@
 
     // 初始化啟動
     window.addEventListener('DOMContentLoaded', () => {
-      initDate();
-      renderTodaySets();
+      initHeader();
+      renderTodayWorkout();
+      renderInBodyDashboard();
       lucide.createIcons();
     });
   </script>
