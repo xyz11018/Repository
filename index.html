@@ -18,6 +18,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- Google Font: Plus Jakarta Sans & Noto Sans TC -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -57,7 +59,7 @@
     /* 適應 iPhone 頂部安全區 (瀏海 / 動態島) 與 底部 Home Bar */
     body {
       padding-top: max(env(safe-area-inset-top), 16px);
-      padding-bottom: calc(max(env(safe-area-inset-bottom), 16px) + 76px);
+      padding-bottom: calc(max(env(safe-area-inset-bottom), 16px) + 82px);
       -webkit-tap-highlight-color: transparent;
       user-select: none;
       background-color: #fff9fa;
@@ -65,7 +67,6 @@
     input, select, textarea {
       user-select: auto;
     }
-    /* 平滑過渡 */
     .tab-content {
       display: none;
       opacity: 0;
@@ -75,7 +76,6 @@
       display: block;
       opacity: 1;
     }
-    /* 自訂捲軸隱藏 */
     ::-webkit-scrollbar {
       display: none;
     }
@@ -84,7 +84,7 @@
 <body class="text-stone-700 antialiased min-h-screen">
 
   <!-- 頂部精緻標頭 -->
-  <header class="sticky top-0 z-30 bg-rosebud-50/90 backdrop-blur-md px-5 py-3.5 border-b border-rose-100 flex items-center justify-between">
+  <header class="sticky top-0 z-30 bg-rosebud-50/90 backdrop-blur-md px-5 py-3 border-b border-rose-100/90 flex items-center justify-between">
     <div class="flex items-center gap-2.5">
       <div class="w-9 h-9 rounded-2xl bg-gradient-to-tr from-rose-400 to-rose-300 text-white flex items-center justify-center shadow-sm shadow-rose-200">
         <i data-lucide="sparkles" class="w-5 h-5"></i>
@@ -144,9 +144,9 @@
         <div>
           <label class="block text-[11px] font-semibold text-stone-400 mb-1.5 uppercase">選擇部位</label>
           <div class="grid grid-cols-4 gap-1.5">
-            <button type="button" onclick="selectMuscleGroup('臀腿', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition">臀腿</button>
-            <button type="button" onclick="selectMuscleGroup('背部', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">背部</button>
-            <button type="button" onclick="selectMuscleGroup('胸肩', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">胸肩</button>
+            <button type="button" onclick="selectMuscleGroup('臀腿', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition">臀腿塑形</button>
+            <button type="button" onclick="selectMuscleGroup('背部', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">美背線條</button>
+            <button type="button" onclick="selectMuscleGroup('胸肩', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">肩胸雕塑</button>
             <button type="button" onclick="selectMuscleGroup('核心/手臂', this)" class="muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-stone-200 bg-white text-stone-500 hover:bg-stone-50 transition">核心手臂</button>
           </div>
         </div>
@@ -155,13 +155,13 @@
         <div>
           <label class="block text-[11px] font-semibold text-stone-400 mb-1 uppercase">動作名稱</label>
           <div class="relative">
-            <input list="presetExercises" id="inputExercise" type="text" placeholder="例：臀推、羅馬尼亞硬舉、酒杯深蹲"
+            <input list="presetExercises" id="inputExercise" type="text" placeholder="例：槓鈴臀推、羅馬尼亞硬舉、高腳杯深蹲"
               class="w-full bg-stone-50 border border-stone-200 rounded-2xl px-3.5 py-2.5 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 transition">
             <datalist id="presetExercises">
               <option value="槓鈴臀推 (Hip Thrust)"></option>
               <option value="啞鈴高腳杯深蹲 (Goblet Squat)"></option>
               <option value="啞鈴羅馬尼亞硬舉 (RDL)"></option>
-              <option value="保加利亞分腿蹲 (Bulgarian Split Squat)"></option>
+              <option value="保加利亞分腿蹲 (Bulgarian Split)"></option>
               <option value="滑輪下拉 (Lat Pulldown)"></option>
               <option value="坐姿划船 (Seated Row)"></option>
               <option value="啞鈴臥推 (Dumbbell Bench Press)"></option>
@@ -212,9 +212,7 @@
           <span class="text-xs text-stone-400" id="todaySetsCountText">0 組訓練</span>
         </div>
 
-        <div id="todaySetsList" class="space-y-2.5">
-          <!-- 動態載入今日紀錄 -->
-        </div>
+        <div id="todaySetsList" class="space-y-2.5"></div>
       </div>
     </section>
 
@@ -257,7 +255,7 @@
           </div>
         </div>
 
-        <!-- 次要指標：內臟脂肪 / 基礎代謝 / 骨骼肌率 -->
+        <!-- 次要指標：內臟脂肪 / 基礎代謝 -->
         <div class="grid grid-cols-2 gap-2 text-xs">
           <div class="bg-white/80 p-2.5 rounded-xl border border-rose-50 flex items-center justify-between">
             <span class="text-stone-400">內臟脂肪等級</span>
@@ -335,7 +333,70 @@
       </div>
     </section>
 
-    <!-- 頁籤三：歷史紀錄與數據備份 (History & Backup) -->
+    <!-- 頁籤三：數據圖表 (Analytics & Trends) -->
+    <section id="tab-analytics" class="tab-content space-y-4">
+      <!-- 圖表子分頁切換 -->
+      <div class="bg-rose-100/60 p-1 rounded-2xl flex items-center text-xs font-bold text-stone-500">
+        <button onclick="switchChartMode('body')" id="chartBtn-body" class="flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition">體態趨勢</button>
+        <button onclick="switchChartMode('volume')" id="chartBtn-volume" class="flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">總容量進度</button>
+        <button onclick="switchChartMode('exercise')" id="chartBtn-exercise" class="flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition">單項 1RM</button>
+      </div>
+
+      <!-- 子圖表 1: 體態趨勢 -->
+      <div id="chartContainer-body" class="bg-white rounded-3xl p-4 border border-rose-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+            <i data-lucide="line-chart" class="w-4 h-4 text-rose-400"></i> 體重與體脂率曲線
+          </h3>
+          <span class="text-[10px] text-stone-400">雙軸對比</span>
+        </div>
+        <!-- 快速指標勾選切換 -->
+        <div class="flex gap-3 text-[11px] font-semibold text-stone-500 px-1">
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-400"></span> 體重 (kg)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> 體脂 (%)</span>
+          <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> 肌肉 (kg)</span>
+        </div>
+        <div class="relative h-64 w-full">
+          <canvas id="bodyTrendsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 子圖表 2: 每次訓練總容量趨勢 -->
+      <div id="chartContainer-volume" class="hidden bg-white rounded-3xl p-4 border border-rose-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-rose-400"></i> 每日訓練總容量 (Volume)
+          </h3>
+          <span class="text-[10px] text-stone-400">重量 × 次數</span>
+        </div>
+        <p class="text-[11px] text-stone-400 leading-tight">漸進式超負荷是肌肉緊實雕塑的關鍵指標。</p>
+        <div class="relative h-64 w-full">
+          <canvas id="volumeTrendsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 子圖表 3: 單項動作 1RM 成長曲線 -->
+      <div id="chartContainer-exercise" class="hidden bg-white rounded-3xl p-4 border border-rose-100 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-xs font-bold text-stone-700 flex items-center gap-1.5">
+            <i data-lucide="trending-up" class="w-4 h-4 text-rose-400"></i> 單一動作 1RM 曲線
+          </h3>
+          <span class="text-[10px] text-stone-400">肌力突破</span>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-stone-400 mb-1">選擇分析動作</label>
+          <select id="exerciseChartSelect" onchange="updateExerciseProgressChart()"
+            class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs font-semibold text-stone-700 focus:outline-none focus:border-rose-400">
+            <!-- 動態填入動作 -->
+          </select>
+        </div>
+        <div class="relative h-64 w-full">
+          <canvas id="exerciseTrendsChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁籤四：歷史紀錄與數據備份 (History & Backup) -->
     <section id="tab-history" class="tab-content space-y-4">
       <!-- 訓練歷史清單 -->
       <div class="bg-white rounded-3xl p-5 border border-rose-100 shadow-sm space-y-3">
@@ -343,9 +404,7 @@
           <i data-lucide="calendar" class="w-4 h-4 text-rose-400"></i> 重訓歷程回顧
         </h3>
         <p class="text-xs text-stone-400">依照每次訓練日期分類檢視總容量與組數細節。</p>
-        <div id="allWorkoutsHistoryList" class="space-y-3 pt-2">
-          <!-- 動態載入完整訓練紀錄 -->
-        </div>
+        <div id="allWorkoutsHistoryList" class="space-y-3 pt-2"></div>
       </div>
 
       <!-- 資料備份與安全性管理 -->
@@ -371,18 +430,22 @@
   </main>
 
   <!-- 底部固定風格導航列 -->
-  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-rose-100/80 px-8 py-2.5 flex justify-around items-center z-40">
+  <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-rose-100/80 px-4 py-2.5 flex justify-around items-center z-40">
     <button onclick="switchTab('workout')" id="navBtn-workout" class="nav-item flex flex-col items-center gap-1 text-rose-500 font-bold">
       <i data-lucide="dumbbell" class="w-5 h-5"></i>
-      <span class="text-[11px]">記訓練</span>
+      <span class="text-[10px]">記訓練</span>
     </button>
     <button onclick="switchTab('inbody')" id="navBtn-inbody" class="nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold">
       <i data-lucide="scale" class="w-5 h-5"></i>
-      <span class="text-[11px]">InBody</span>
+      <span class="text-[10px]">InBody</span>
+    </button>
+    <button onclick="switchTab('analytics')" id="navBtn-analytics" class="nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold">
+      <i data-lucide="line-chart" class="w-5 h-5"></i>
+      <span class="text-[10px]">數據圖表</span>
     </button>
     <button onclick="switchTab('history')" id="navBtn-history" class="nav-item flex flex-col items-center gap-1 text-stone-400 hover:text-rose-400 font-semibold">
       <i data-lucide="history" class="w-5 h-5"></i>
-      <span class="text-[11px]">歷史備份</span>
+      <span class="text-[10px]">歷史備份</span>
     </button>
   </nav>
 
@@ -392,16 +455,19 @@
   </div>
 
   <script>
-    // --- 儲存庫鍵名 ---
     const STORAGE_KEY_WORKOUTS = 'bloomfit_workouts_v2';
     const STORAGE_KEY_INBODY = 'bloomfit_inbody_v2';
 
-    // 狀態變數
     let workoutLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_WORKOUTS) || '[]');
     let inbodyLogs = JSON.parse(localStorage.getItem(STORAGE_KEY_INBODY) || '[]');
     let currentMuscleGroup = '臀腿';
+    let currentChartMode = 'body';
 
-    // 激勵金句隨機切換
+    // Chart.js 實例暫存
+    let bodyChartInstance = null;
+    let volumeChartInstance = null;
+    let exerciseChartInstance = null;
+
     const MOTIVATIONS = [
       '今天的妳比昨天更有力量 ✨',
       '每一組努力都不會白費 💕',
@@ -410,7 +476,6 @@
       '肌肉是最好的緊緻緊身衣 💫'
     ];
 
-    // 日期工具
     function getTodayString() {
       const d = new Date();
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -426,7 +491,6 @@
       document.getElementById('inbodyDate').value = getTodayString();
     }
 
-    // --- 訊息提示視窗 (Toast) 替代 alert ---
     function showToast(message) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -438,7 +502,6 @@
       }, 2200);
     }
 
-    // --- 頁籤切換 ---
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => {
@@ -452,10 +515,10 @@
 
       if (tabId === 'workout') renderTodayWorkout();
       if (tabId === 'inbody') renderInBodyDashboard();
+      if (tabId === 'analytics') renderAnalyticsCharts();
       if (tabId === 'history') renderAllHistory();
     }
 
-    // --- 部位選取邏輯 ---
     function selectMuscleGroup(group, btn) {
       currentMuscleGroup = group;
       document.querySelectorAll('.muscle-group-btn').forEach(b => {
@@ -463,7 +526,6 @@
       });
       btn.className = 'muscle-group-btn py-1.5 text-xs font-semibold rounded-xl border border-rose-200 bg-rose-50 text-rose-600 transition';
 
-      // 依部位切換常用預設動作提示
       const datalist = document.getElementById('presetExercises');
       if (group === '臀腿') {
         datalist.innerHTML = `
@@ -499,7 +561,6 @@
       }
     }
 
-    // --- 重訓計算輔助 ---
     function calculate1RM(weight, reps) {
       if (reps <= 0) return 0;
       if (reps === 1) return weight;
@@ -532,7 +593,6 @@
       onSetInputChanged();
     }
 
-    // --- 儲存單組訓練 ---
     function saveWorkoutSet() {
       const exercise = document.getElementById('inputExercise').value.trim();
       const weight = parseFloat(document.getElementById('inputWeight').value);
@@ -574,7 +634,6 @@
       renderAllHistory();
     }
 
-    // --- 渲染今日重訓清單與卡片 ---
     function renderTodayWorkout() {
       const todayStr = getTodayString();
       const todayList = workoutLogs.filter(item => item.date === todayStr);
@@ -607,7 +666,6 @@
         return;
       }
 
-      // 按動作分組顯示
       const grouped = {};
       todayList.forEach(item => {
         if (!grouped[item.exercise]) grouped[item.exercise] = [];
@@ -645,7 +703,6 @@
       lucide.createIcons();
     }
 
-    // --- InBody 邏輯 ---
     function saveInBodyRecord() {
       const date = document.getElementById('inbodyDate').value || getTodayString();
       const weight = parseFloat(document.getElementById('inbodyInputWeight').value);
@@ -670,7 +727,6 @@
         bmr: bmr
       };
 
-      // 檢查是否同日期已存在，存在則更新，否則加入
       const existingIdx = inbodyLogs.findIndex(item => item.date === date);
       if (existingIdx !== -1) {
         inbodyLogs[existingIdx] = newInbody;
@@ -678,7 +734,6 @@
         inbodyLogs.unshift(newInbody);
       }
 
-      // 依日期重新排序
       inbodyLogs.sort((a, b) => new Date(b.date) - new Date(a.date));
       localStorage.setItem(STORAGE_KEY_INBODY, JSON.stringify(inbodyLogs));
 
@@ -728,13 +783,11 @@
       document.getElementById('dashVisceral').textContent = latest.visceral ? `Lv. ${latest.visceral}` : '未填';
       document.getElementById('dashBMR').textContent = latest.bmr ? `${latest.bmr} kcal` : '未填';
 
-      // 差值計算
       function formatDiff(cur, old, unit = '', inverse = false) {
         if (!old) return '<span class="text-stone-300 font-normal">首筆紀錄</span>';
         const diff = Math.round((cur - old) * 10) / 10;
         if (diff === 0) return `<span class="text-stone-400">持平</span>`;
         const sign = diff > 0 ? `+${diff}` : `${diff}`;
-        // 體脂增加為負向(粉紅/紅)，肌肉增加為正向(綠)
         const isGood = inverse ? diff < 0 : diff > 0;
         const color = isGood ? 'text-emerald-500' : 'text-rose-500';
         return `<span class="${color}">${sign} ${unit}</span>`;
@@ -744,11 +797,7 @@
       document.getElementById('diffFat').innerHTML = formatDiff(latest.bodyFat, prev?.bodyFat, '%', true);
       document.getElementById('diffMuscle').innerHTML = formatDiff(latest.muscle, prev?.muscle, 'kg', false);
 
-      // 歷史列表渲染
       historyList.innerHTML = inbodyLogs.map((item, idx) => {
-        const nextItem = inbodyLogs[idx + 1] || null;
-        const diffW = nextItem ? Math.round((item.weight - nextItem.weight) * 10) / 10 : null;
-        const diffF = nextItem ? Math.round((item.bodyFat - nextItem.bodyFat) * 10) / 10 : null;
         return `
           <div class="bg-white rounded-2xl p-3.5 border border-rose-100 shadow-xs flex items-center justify-between">
             <div>
@@ -774,7 +823,249 @@
       lucide.createIcons();
     }
 
-    // --- 完整歷史總覽渲染 ---
+    function switchChartMode(mode) {
+      currentChartMode = mode;
+      ['body', 'volume', 'exercise'].forEach(m => {
+        const btn = document.getElementById(`chartBtn-${m}`);
+        const container = document.getElementById(`chartContainer-${m}`);
+        if (m === mode) {
+          btn.className = 'flex-1 py-2 rounded-xl bg-white text-rose-600 shadow-xs transition';
+          container.classList.remove('hidden');
+        } else {
+          btn.className = 'flex-1 py-2 rounded-xl text-stone-500 hover:text-rose-500 transition';
+          container.classList.add('hidden');
+        }
+      });
+      renderAnalyticsCharts();
+    }
+
+    function renderAnalyticsCharts() {
+      if (currentChartMode === 'body') {
+        renderBodyTrendsChart();
+      } else if (currentChartMode === 'volume') {
+        renderVolumeTrendsChart();
+      } else if (currentChartMode === 'exercise') {
+        renderExerciseDropdown();
+        updateExerciseProgressChart();
+      }
+      lucide.createIcons();
+    }
+
+    // 圖表 1: 體態趨勢 (依時間升序排列)
+    function renderBodyTrendsChart() {
+      const ctx = document.getElementById('bodyTrendsChart').getContext('2d');
+      if (bodyChartInstance) bodyChartInstance.destroy();
+
+      const sortedData = [...inbodyLogs].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const labels = sortedData.map(d => d.date.slice(5)); // 取 MM-DD
+
+      bodyChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['尚未有資料'],
+          datasets: [
+            {
+              label: '體重 (kg)',
+              data: sortedData.map(d => d.weight),
+              borderColor: '#fb7185',
+              backgroundColor: 'rgba(251, 113, 133, 0.12)',
+              fill: true,
+              tension: 0.35,
+              yAxisID: 'yWeight',
+              borderWidth: 2.5,
+              pointRadius: 4,
+              pointBackgroundColor: '#fb7185'
+            },
+            {
+              label: '體脂率 (%)',
+              data: sortedData.map(d => d.bodyFat),
+              borderColor: '#f59e0b',
+              backgroundColor: 'transparent',
+              tension: 0.35,
+              yAxisID: 'yFat',
+              borderWidth: 2,
+              borderDash: [4, 4],
+              pointRadius: 3.5,
+              pointBackgroundColor: '#f59e0b'
+            },
+            {
+              label: '骨骼肌 (kg)',
+              data: sortedData.map(d => d.muscle),
+              borderColor: '#10b981',
+              backgroundColor: 'transparent',
+              tension: 0.35,
+              yAxisID: 'yWeight',
+              borderWidth: 2,
+              pointRadius: 3.5,
+              pointBackgroundColor: '#10b981'
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(28, 25, 23, 0.85)',
+              padding: 10,
+              cornerRadius: 12,
+              titleFont: { size: 12, weight: 'bold' }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            },
+            yWeight: {
+              type: 'linear',
+              position: 'left',
+              grid: { color: '#f4ece3' },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            },
+            yFat: {
+              type: 'linear',
+              position: 'right',
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#f59e0b' }
+            }
+          }
+        }
+      });
+    }
+
+    // 圖表 2: 每日訓練總容量
+    function renderVolumeTrendsChart() {
+      const ctx = document.getElementById('volumeTrendsChart').getContext('2d');
+      if (volumeChartInstance) volumeChartInstance.destroy();
+
+      const volumeByDate = {};
+      workoutLogs.forEach(it => {
+        volumeByDate[it.date] = (volumeByDate[it.date] || 0) + it.volume;
+      });
+
+      const sortedDates = Object.keys(volumeByDate).sort((a, b) => new Date(a) - new Date(b));
+      const labels = sortedDates.map(d => d.slice(5));
+      const dataValues = sortedDates.map(d => volumeByDate[d]);
+
+      volumeChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels.length ? labels : ['尚未有紀錄'],
+          datasets: [{
+            label: '總容量 (kg)',
+            data: dataValues,
+            backgroundColor: 'rgba(251, 113, 133, 0.75)',
+            hoverBackgroundColor: '#f43f5e',
+            borderRadius: 8,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(28, 25, 23, 0.85)',
+              padding: 10,
+              cornerRadius: 12,
+              callbacks: {
+                label: (ctx) => ` 總容量: ${ctx.parsed.y.toLocaleString()} kg`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            },
+            y: {
+              grid: { color: '#f4ece3' },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            }
+          }
+        }
+      });
+    }
+
+    // 圖表 3: 單項動作 1RM 進度
+    function renderExerciseDropdown() {
+      const select = document.getElementById('exerciseChartSelect');
+      const uniqueExercises = Array.from(new Set(workoutLogs.map(w => w.exercise)));
+      
+      const currentSelected = select.value;
+      select.innerHTML = uniqueExercises.length 
+        ? uniqueExercises.map(ex => `<option value="${ex}">${ex}</option>`).join('')
+        : '<option value="">尚無動作紀錄</option>';
+
+      if (uniqueExercises.includes(currentSelected)) {
+        select.value = currentSelected;
+      }
+    }
+
+    function updateExerciseProgressChart() {
+      const ctx = document.getElementById('exerciseTrendsChart').getContext('2d');
+      const selectedExercise = document.getElementById('exerciseChartSelect').value;
+      if (exerciseChartInstance) exerciseChartInstance.destroy();
+
+      if (!selectedExercise) return;
+
+      const filtered = workoutLogs.filter(w => w.exercise === selectedExercise);
+      // 依日期分組取每日最高 1RM
+      const max1rmByDate = {};
+      filtered.forEach(item => {
+        if (!max1rmByDate[item.date] || item.oneRM > max1rmByDate[item.date]) {
+          max1rmByDate[item.date] = item.oneRM;
+        }
+      });
+
+      const sortedDates = Object.keys(max1rmByDate).sort((a, b) => new Date(a) - new Date(b));
+      const labels = sortedDates.map(d => d.slice(5));
+      const values = sortedDates.map(d => max1rmByDate[d]);
+
+      exerciseChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels.length ? labels : ['無數據'],
+          datasets: [{
+            label: '最高預估 1RM (kg)',
+            data: values,
+            borderColor: '#fb7185',
+            backgroundColor: 'rgba(251, 113, 133, 0.1)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2.5,
+            pointRadius: 4.5,
+            pointBackgroundColor: '#e11d48'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(28, 25, 23, 0.85)',
+              padding: 10,
+              cornerRadius: 12
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            },
+            y: {
+              grid: { color: '#f4ece3' },
+              ticks: { font: { size: 10 }, color: '#a8a29e' }
+            }
+          }
+        }
+      });
+    }
+
     function renderAllHistory() {
       const container = document.getElementById('allWorkoutsHistoryList');
       if (workoutLogs.length === 0) {
@@ -812,11 +1103,10 @@
       }).join('');
     }
 
-    // --- 資料匯出與匯入 (JSON) ---
     function exportAllData() {
       const backupPackage = {
         app: 'BloomFit',
-        version: 2.0,
+        version: 2.1,
         exportedAt: new Date().toISOString(),
         workouts: workoutLogs,
         inbody: inbodyLogs
@@ -851,7 +1141,7 @@
           showToast('資料還原成功！🌷');
           renderTodayWorkout();
           renderInBodyDashboard();
-          switchTab('inbody');
+          switchTab('analytics');
         } catch (err) {
           showToast('檔案格式不符，請確認是正確的備份檔。');
         }
@@ -859,7 +1149,6 @@
       reader.readAsText(file);
     }
 
-    // 初始化啟動
     window.addEventListener('DOMContentLoaded', () => {
       initHeader();
       renderTodayWorkout();
